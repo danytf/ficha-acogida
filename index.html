@@ -293,7 +293,7 @@ var COMPRUEBA = [
   'Observa sus tres primeras paradas y apunta qué hace cuando se atasca.',
   'A media mañana pregúntale qué le ayuda y qué le estorba. Si lo que ves no encaja con esta ficha, manda lo que ves.'
 ];
-var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 12 situaciones y 8 afirmaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
+var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 14 situaciones y 12 afirmaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
 
 var QB = [
   {t: 'Es tu primer día en la calle. ¿Qué te gustaría que pasara primero?', o: {
@@ -355,10 +355,20 @@ var QB = [
     A: 'Haber hecho muchas paradas, aunque no todas hayan salido bien.',
     R: 'Haber visto cómo trabajan los demás y qué puedo mejorar.',
     T: 'Haber entendido bien cómo funciona todo, aunque hayan salido pocas paradas.',
-    P: 'Haber conseguido algo concreto y útil que me sirva mañana mismo.'}}
+    P: 'Haber conseguido algo concreto y útil que me sirva mañana mismo.'}},
+  {t: 'Tu RE te propone practicar un speech antes de salir. ¿Cómo lo prefieres?', o: {
+    A: 'Lo ensayo directamente en la calle con la primera persona que pare.',
+    R: 'Escucho cómo lo dice mi RE y después lo preparo a mi manera.',
+    T: 'Reviso su estructura y la razón de cada parte antes de decirlo.',
+    P: 'Me quedo con unas frases útiles y las repito hasta soltarme.'}},
+  {t: 'Tienes un rato libre antes de salir a la calle. ¿Qué haces con él?', o: {
+    A: 'Me pongo a practicar en voz alta lo que voy a decir.',
+    R: 'Observo a mis compañeros y repaso mentalmente lo que he visto.',
+    T: 'Leo notas o información sobre la ONG y sus proyectos.',
+    P: 'Repaso la lista de respuestas útiles para las objeciones más habituales.'}}
 ];
 
-/* Afirmaciones de acuerdo (1 a 5): dos por estilo, en este orden fijo. Sirven para confirmar o poner en duda el resultado de las situaciones. */
+/* Afirmaciones de acuerdo (1 a 5): tres por estilo, en este orden fijo; la tercera de cada estilo está redactada al revés (se puntúa 6 − respuesta). Sirven para confirmar o poner en duda el resultado de las situaciones. */
 var LK = [
   {k:'A', t:'Prefiero probar algo yo mismo antes de que me lo expliquen todo.'},
   {k:'A', t:'Aprendo más haciendo y equivocándome que escuchando explicaciones.'},
@@ -367,14 +377,18 @@ var LK = [
   {k:'T', t:'Me ayuda entender el porqué de las cosas antes de hacerlas.'},
   {k:'T', t:'Me siento más seguro cuando tengo la información completa y ordenada.'},
   {k:'P', t:'Me quedo con lo que veo que puedo aplicar enseguida.'},
-  {k:'P', t:'Prefiero una solución concreta a una explicación general.'}
+  {k:'P', t:'Prefiero una solución concreta a una explicación general.'},
+  {k:'A', t:'Me resulta incómodo ponerme a probar sin saber antes cómo se hace.', rev:true},
+  {k:'R', t:'Me resulta fácil responder enseguida, sin pensarlo, cuando me preguntan algo.', rev:true},
+  {k:'T', t:'Me da igual no entender por qué funciona algo si me funciona.', rev:true},
+  {k:'P', t:'Me gusta que me expliquen cosas aunque no las vaya a usar pronto.', rev:true}
 ];
 
 /* ===== Lógica ===== */
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
-/* Cada situación suma +1 al estilo marcado como "más como yo" y −1 al marcado como "menos" (de −12 a +12).
-   claro: 6 o más y 4 de ventaja; par: dos estilos a 1 punto o menos y ambos con 4 o más;
+/* Cada situación suma +1 al estilo marcado como "más como yo" y −1 al marcado como "menos" (de −14 a +14).
+   claro: 7 o más y 5 de ventaja; par: dos estilos a 1 punto o menos y ambos con 5 o más;
    sin preferencia: el primero no llega a 4 o hay tres estilos a 1 punto de distancia; ligera: el resto. */
 function scoresOf(s){
   var sc = {A:0,R:0,T:0,P:0};
@@ -384,7 +398,7 @@ function scoresOf(s){
 }
 function lkMeans(s){
   var t = {A:0,R:0,T:0,P:0}, n = {A:0,R:0,T:0,P:0};
-  LK.forEach(function(it,i){ if (s.lk && s.lk[i]) { t[it.k] += s.lk[i]; n[it.k]++; } });
+  LK.forEach(function(it,i){ if (s.lk && s.lk[i]) { t[it.k] += it.rev ? 6 - s.lk[i] : s.lk[i]; n[it.k]++; } });
   var m = {}; ['A','R','T','P'].forEach(function(k){ m[k] = n[k] ? t[k]/n[k] : 0; });
   return m;
 }
@@ -392,8 +406,8 @@ function profile(sc){
   var keys = ['A','R','T','P'].sort(function(a,b){ return sc[b]-sc[a]; });
   var s1 = sc[keys[0]], s2 = sc[keys[1]], s3 = sc[keys[2]];
   if (s1 <= 3 || s1 - s3 <= 1) return {tipo:'sin', max:s1, items:[], scores:sc};
-  if (s1 - s2 <= 1 && s2 >= 4) return {tipo:'par', max:s1, items:[keys[0],keys[1]], scores:sc};
-  return {tipo: (s1 >= 6 && s1 - s2 >= 4) ? 'claro' : 'ligera', max:s1, items:[keys[0]], scores:sc};
+  if (s1 - s2 <= 1 && s2 >= 5) return {tipo:'par', max:s1, items:[keys[0],keys[1]], scores:sc};
+  return {tipo: (s1 >= 7 && s1 - s2 >= 5) ? 'claro' : 'ligera', max:s1, items:[keys[0]], scores:sc};
 }
 /* Fiabilidad de este resultado: ¿se contradicen las respuestas? ¿lo confirman las afirmaciones de 1 a 5? */
 function confianza(s, pf){
@@ -402,6 +416,12 @@ function confianza(s, pf){
   var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 4 && least[k] >= 3; });
   var lm = lkMeans(s);
   var igual = s.lk.every(function(v){ return v === s.lk[0]; });
+  var lkIncoh = ['A','R','T','P'].filter(function(k){
+    var d = [], r = null;
+    LK.forEach(function(it,i){ if (it.k===k) { if (it.rev) r = 6 - s.lk[i]; else d.push(s.lk[i]); } });
+    return Math.abs(d.reduce(function(a,b){ return a+b; },0)/d.length - r) >= 3;
+  }).length >= 2;
+  contradice = contradice || lkIncoh;
   if (pf.tipo === 'sin') return {nivel: contradice ? 'baja' : null, contradice: contradice, igual: igual, lm: lm};
   var avg = pf.items.reduce(function(a,k){ return a + lm[k]; }, 0) / pf.items.length;
   var nivel = 'media';
@@ -418,9 +438,9 @@ function sg(n){ return (n>0?'+':n<0?'\u2212':'') + Math.abs(n); }
 function prefLabel(pf){
   if (pf.tipo==='sin') return 'Sin preferencia clara';
   var n = ST[pf.items[0]].name, sc = pf.scores;
-  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 12)';
-  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + sg(sc[pf.items[0]]) + ' de 12)';
-  return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 12)';
+  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 14)';
+  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + sg(sc[pf.items[0]]) + ' de 14)';
+  return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 14)';
 }
 
 function buildFicha(s){
@@ -514,20 +534,20 @@ function b64dec(s){
 function isoToday(){ var d = new Date(); function z(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}); }
 function encodeState(s){
-  return 'v3.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:isoToday()}));
+  return 'v4.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:isoToday()}));
 }
 function decodeState(hash){
   try{
     var h = String(hash||'').replace(/^#/,'');
-    if (h.indexOf('v3.') !== 0) return null;
+    if (h.indexOf('v4.') !== 0) return null;
     var o = JSON.parse(b64dec(h.slice(3)));
     if (!o || typeof o !== 'object') return null;
     var nombre = String(o.n||'').trim().slice(0,60), re = String(o.r||'').trim().slice(0,60);
     var m = String(o.m||''), l = String(o.l||''), k = String(o.k||'');
     if (!nombre || !EXP[o.e] || !COMP[o.c] || !WORRY[o.w]) return null;
     if (!(o.f===1||o.f===2||o.f===3||o.f===4||o.f===5)) return null;
-    if (!/^[ARTP]{12}$/.test(m) || !/^[ARTP]{12}$/.test(l) || !/^[1-5]{8}$/.test(k)) return null;
-    for (var q=0;q<12;q++) if (m.charAt(q)===l.charAt(q)) return null;
+    if (!/^[ARTP]{14}$/.test(m) || !/^[ARTP]{14}$/.test(l) || !/^[1-5]{12}$/.test(k)) return null;
+    for (var q=0;q<14;q++) if (m.charAt(q)===l.charAt(q)) return null;
     var d = /^\d{4}-\d{2}-\d{2}$/.test(String(o.d)) ? String(o.d) : isoToday();
     return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d)};
   }catch(e){ return null; }
@@ -540,8 +560,8 @@ var app = document.getElementById('app');
 var bar = document.getElementById('bar');
 var barwrap = document.getElementById('barwrap');
 var tagEl = document.getElementById('tag');
-var TOTAL = 17;
-function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null,null,null,null,null], lk:[null,null,null,null,null,null,null,null], order:[], lkOrder:[]}; }
+var TOTAL = 20;
+function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], lk:[null,null,null,null,null,null,null,null,null,null,null,null], order:[], lkOrder:[]}; }
 var S = newState();
 
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -571,7 +591,7 @@ function viewIntro(){
    '<div class="narrow">'+
    '<p class="eyebrow">Ficha de acogida</p>'+
    '<h1>Cuéntanos cómo aprendes</h1>'+
-   '<p class="lead" style="margin-top:16px">Son unos 8 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
+   '<p class="lead" style="margin-top:16px">Son unos 10 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
    '<p class="muted small">Tus respuestas no se guardan en ningún sitio. Solo se envían a tu RE si tú pulsas el botón al final.</p>'+
    '<div class="field" style="margin-top:24px"><label class="lbl" for="nombre">Tu nombre</label><input type="text" id="nombre" autocomplete="given-name" maxlength="60" value="'+esc(S.nombre)+'"></div>'+
    '<div class="field"><label class="lbl" for="re">Nombre de tu RE <span class="muted" style="font-weight:400">(opcional)</span></label><input type="text" id="re" maxlength="60" value="'+esc(S.re)+'"></div>'+
@@ -591,7 +611,7 @@ function viewA(){
   setProgress(1);
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso 1 de '+(QB.length+3)+' · Tu punto de partida</p>'+
+   '<p class="qcount">Paso 1 de '+(QB.length+4)+' · Tu punto de partida</p>'+
    '<h1 class="q-title" style="font-size:clamp(34px,8vw,52px)">Para empezar</h1>'+
    '<fieldset><legend>¿Has captado o vendido antes cara a cara?</legend><div class="opts">'+
      opt('exp','none','No, es la primera vez',S.exp==='none')+opt('exp','some','Algo (menos de 6 meses)',S.exp==='some')+opt('exp','lots','Sí, más de 6 meses',S.exp==='lots')+
@@ -622,7 +642,7 @@ function viewA(){
   document.getElementById('next').onclick = function(){
     if(!S.exp || !S.comp || !S.conf || !S.worry){ document.getElementById('err').textContent = 'Responde a las cuatro preguntas para continuar.'; return; }
     if(!S.order.length){ S.order = QB.map(function(){ return shuffle(['A','R','T','P']); }); }
-    if(!S.lkOrder.length){ S.lkOrder = shuffle([0,1,2,3,4,5,6,7]); }
+    if(!S.lkOrder.length){ S.lkOrder = shuffle([0,1,2,3,4,5,6,7,8,9,10,11]); }
     viewB(0);
   };
   focusTop();
@@ -634,7 +654,7 @@ function viewB(i){
   function chip(g, k, txt, lab){ return '<label class="chip chip-'+g+'"><input type="radio" name="'+g+'" value="'+k+'"'+(S[g][i]===k?' checked':'')+' aria-label="'+lab+': '+esc(txt)+'"><span>'+(g==='m'?'Más':'Menos')+'</span></label>'; }
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso '+(i+2)+' de '+(N+3)+' · Cómo aprendes · '+(i+1)+'/'+N+'</p>'+
+   '<p class="qcount">Paso '+(i+2)+' de '+(N+4)+' · Cómo aprendes · '+(i+1)+'/'+N+'</p>'+
    '<h1 class="sr-only">Situación '+(i+1)+' de '+N+'</h1>'+
    '<fieldset><legend class="q-title">'+esc(q.t)+'<span class="q-hint">Marca una como la que más se parece a ti y otra como la que menos.</span></legend><div class="bws">'+
      ord.map(function(k){ var t = q.o[k];
@@ -670,24 +690,24 @@ function viewL(j){
   var N = QB.length, idx = S.lkOrder.slice(j*4, j*4+4);
   app.innerHTML =
    '<div class="narrow">'+
-   '<h1 class="sr-only">Afirmaciones '+(j+1)+' de 2</h1>'+
-   '<p class="qcount">Paso '+(N+2+j)+' de '+(N+3)+' · Cuánto te identificas · '+(j+1)+'/2</p>'+
+   '<h1 class="sr-only">Afirmaciones '+(j+1)+' de 3</h1>'+
+   '<p class="qcount">Paso '+(N+2+j)+' de '+(N+4)+' · Cuánto te identificas · '+(j+1)+'/3</p>'+
    '<p class="lead" style="margin-bottom:20px">¿Cuánto estás de acuerdo con cada frase?</p>'+
    idx.map(function(ix){
      return '<fieldset><legend>'+esc(LK[ix].t)+'</legend><div class="scale">'+[1,2,3,4,5].map(function(n){ return '<label class="opt"><input type="radio" name="lk'+ix+'" value="'+n+'"'+(S.lk[ix]===n?' checked':'')+' aria-label="'+n+' de 5"><span class="dot" aria-hidden="true"></span><span class="txt">'+n+'</span></label>'; }).join('')+'</div><div class="scale-ends"><span>1 · Nada de acuerdo</span><span>5 · Muy de acuerdo</span></div></fieldset>';
    }).join('')+
    '<p class="err" id="err" role="alert"></p>'+
-   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(j===1?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
+   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(j===2?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
    '</div>';
   idx.forEach(function(ix){
     Array.prototype.forEach.call(app.querySelectorAll('input[name="lk'+ix+'"]'), function(inp){
       inp.onchange = function(){ S.lk[ix] = parseInt(inp.value,10); document.getElementById('err').textContent = ''; };
     });
   });
-  document.getElementById('back').onclick = function(){ if(j===0) viewB(N-1); else viewL(0); };
+  document.getElementById('back').onclick = function(){ if(j===0) viewB(N-1); else viewL(j-1); };
   document.getElementById('next').onclick = function(){
     if(idx.some(function(ix){ return !S.lk[ix]; })){ document.getElementById('err').textContent = 'Responde a las cuatro frases para continuar.'; return; }
-    if(j===0) viewL(1); else viewDone();
+    if(j<2) viewL(j+1); else viewDone();
   };
   focusTop();
 }
@@ -729,7 +749,7 @@ function viewDone(){
     var msg = 'Ficha de acogida de ' + S.nombre + (S.re ? ' para ' + S.re : '') + ': ' + link;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
-  document.getElementById('back').onclick = function(){ viewL(1); };
+  document.getElementById('back').onclick = function(){ viewL(2); };
   document.getElementById('again').onclick = function(){ S = newState(); viewIntro(); };
   focusTop();
 }
