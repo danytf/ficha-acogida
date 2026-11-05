@@ -130,7 +130,7 @@ footer.vals span{white-space:nowrap;display:inline-block;margin:0 .25em}
 @media print{
   :root:root:root{--bg:#FFFFFF;--surface:#F5F2ED;--soft:#F0ECE6;--ink:#151313;--muted:#5B5551;--line:#DDD7CF;--stripe:#DDD7CF;--red-text:#B30F14;--tint:#FDECEE;--ok:#1B7A4B;color-scheme:light}
   html,body{background:#fff}
-  body{font-size:13.5px;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-size:13px;line-height:1.32;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   header.top{position:relative;top:0;height:64px;border-bottom:0;margin:0;width:100%}
   header.top .brand img{width:130px}
   .bar,.row,.status,.back,#barwrap{display:none!important}
@@ -341,18 +341,23 @@ function buildFicha(s){
   var counts = {A:0,R:0,T:0,P:0};
   s.b.forEach(function(k){ if(k) counts[k]++; });
   var pf = profile(counts);
+  /* Dos estilos a la par: va primero el que marcó en la situación 1 (qué le gustaría que pasara primero) */
+  if (pf.tipo==='par' && pf.items.indexOf(s.b[0])===1) pf.items.reverse();
   var nivel = guiaNivel(s.exp, s.comp);
   var empieza = pf.tipo==='sin'
     ? 'Que te vea hacerlo 20–30 minutos y que practique enseguida una sola técnica. Observa qué te pide y decide por lo que veas.'
-    : ST[pf.items[0]].primeras;
+    : pf.tipo==='par'
+      ? 'Empieza por el estilo ' + ST[pf.items[0]].name + '. ' + ST[pf.items[0]].primeras + ' Después prueba con el estilo ' + ST[pf.items[1]].name + '. ' + ST[pf.items[1]].primeras
+      : ST[pf.items[0]].primeras;
   var ajustes = [GUIA[nivel]];
   if (s.conf <= 2) ajustes.push('Seguridad baja: empieza con metas pequeñas y alcanzables, y cuéntale qué se espera en estas primeras horas.');
   else if (s.conf >= 4) ajustes.push('Seguridad alta: comprueba que domina lo básico antes de soltarle (mira las comprobaciones de abajo).');
   ajustes.push(WORRY[s.worry].texto);
-  var senal = pf.tipo==='sin' ? null : ST[pf.items[0]].senales[0];
+  var senales = pf.items.map(function(k){ return ST[k].senales[0]; });
+  var senal = senales[0] || null;
   var nota = null;
   if (pf.tipo==='ligera') nota = 'Inclinación ligera: tómalo como hipótesis y comprueba qué consejos de esta tarjeta le funcionan.';
-  else if (pf.tipo==='par') nota = 'Dos estilos a la par: combina los consejos de ambas tarjetas y comprueba cuáles le funcionan.';
+  else if (pf.tipo==='par') nota = 'Dos estilos a la par: va primero el que marcó al elegir qué le gustaría que pasara primero. Combina los consejos de ambas tarjetas y comprueba cuáles le funcionan.';
   else if (pf.tipo==='sin') nota = 'Sus respuestas no se inclinan hacia un estilo: usa la base común, observa cómo reacciona y ajusta según lo que veas.';
   var facts = [
     ['Experiencia previa', EXP[s.exp].short],
@@ -361,7 +366,7 @@ function buildFicha(s){
     ['Le preocupa', WORRY[s.worry].short],
     ['Preferencia orientativa', prefLabel(pf, counts)]
   ];
-  return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, nota:nota,
+  return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
           estilos:pf.items.map(function(k){ return ST[k]; }), pf:pf, counts:counts};
 }
 
@@ -377,7 +382,7 @@ function toText(f){
   L.push('');
   L.push('TRES COSAS PARA HOY');
   f.ajustes.forEach(function(a){ L.push('- ' + a); });
-  if (f.senal){ L.push(''); L.push('UNA SEÑAL A VIGILAR'); L.push(f.senal[0] + ' → ' + f.senal[1]); }
+  if (f.senales.length){ L.push(''); L.push(f.senales.length>1 ? 'SEÑALES A VIGILAR' : 'UNA SEÑAL A VIGILAR'); f.senales.forEach(function(x){ L.push(x[0] + ' → ' + x[1]); }); }
   L.push('');
   L.push('BASE COMÚN');
   COMUN.forEach(function(a){ L.push('- ' + a); });
@@ -624,7 +629,7 @@ function viewFicha(st){
    '<div class="facts">'+f.facts.map(function(x){ return '<div class="fact"><span class="k">'+esc(x[0])+'</span><span class="v">'+esc(x[1])+'</span></div>'; }).join('')+'</div>'+
    '<div class="action"><span class="k">Empieza por esto</span><p>'+esc(f.empieza)+'</p></div>'+
    '<section class="sec"><h2>Tres cosas para hoy</h2>'+listHtml(f.ajustes)+'</section>'+
-   (f.senal ? '<section class="sec"><h2>Una señal a vigilar</h2>'+sigHtml([f.senal])+'</section>' : '')+
+   (f.senales.length ? '<section class="sec"><h2>'+(f.senales.length>1 ? 'Señales a vigilar' : 'Una señal a vigilar')+'</h2>'+sigHtml(f.senales)+'</section>' : '')+
    '<details class="fold"><summary>Cómo enseñarle</summary><div class="inner">'+(f.nota ? '<p class="hyp">'+esc(f.nota)+'</p>' : '')+'<div class="cards">'+cards+'</div></div></details>'+
    '<details class="fold"><summary>Base común para todos</summary><div class="inner">'+listHtml(COMUN)+'</div></details>'+
    '<details class="fold"><summary>Comprueba hoy</summary><div class="inner">'+listHtml(COMPRUEBA)+'</div></details>'+
