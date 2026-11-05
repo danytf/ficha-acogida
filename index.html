@@ -89,6 +89,9 @@ legend{padding:0;margin:0 0 12px;font-weight:700;font-size:20px;line-height:1.3}
 .chip:has(input:focus-visible) span{outline:3px solid var(--focus);outline-offset:2px}
 @media (max-width:480px){.bw{flex-direction:column;align-items:stretch}.chips{justify-content:flex-end}.chip span{min-width:88px}}
 
+.opt.check .dot{border-radius:4px}
+.opt.check:has(input:checked) .dot::after{border-radius:2px}
+.ajuste h3{font-size:22px;margin:14px 0 6px}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Botones */
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
@@ -204,7 +207,7 @@ var ST = {
   R: {
     name: 'Reflexivo',
     aprende: 'Aprende observando y escuchando, y piensa antes de actuar.',
-    primeras: 'En sus dos primeras horas, que sea tu sombra: que te vea parar al socio, contar el speech, rebatir y negociar la cuota, y que vea y escuche cómo lo hacen otros compañeros.',
+    primeras: 'En sus dos primeras horas, que sea tu sombra: que te vea parar al socio, contar el speech, rebatir y negociar la cuota, y que vea y escuche cómo lo hacen otros compañeros. Que observe para aprender, sin compararle con ellos.',
     explicar: [
       'Dale speechs escritos de ejemplo de otros compañeros y la lista de posibles objeciones con sus rebatidas.',
       'Que cada compañero cuente su proyecto favorito. Fíjate sobre todo en cómo lo transmite a un posible socio, qué puede preguntar el socio y qué le dice el captador.',
@@ -286,7 +289,7 @@ var COMUN = [
   'Que te vea hacerlo (sombra) antes de probar o mientras prueba.',
   'En la calle, una técnica cada vez, y a practicarla enseguida.',
   'Feedback concreto tras cada intento.',
-  'Repasad mañana, en 5 minutos, lo de hoy.'
+  'Repasad mañana, en 5–7 minutos, lo de hoy.'
 ];
 var COMPRUEBA = [
   'Pídele que te cuente la estructura del speech (parada, argumentario, cierre).',
@@ -294,6 +297,41 @@ var COMPRUEBA = [
   'A media mañana pregúntale qué le ayuda y qué le estorba. Si lo que ves no encaja con esta ficha, manda lo que ves.'
 ];
 var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 14 situaciones y 12 afirmaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
+
+/* Primer día en tramos y pauta de los días 1 a 5. Las garantías de los días 1 a 5 son de la presentación "Integración del captador en los primeros 100 días" (fase 1); la micro-victoria por estilo y el texto de cada tramo son propuestas pendientes de revisar. */
+var MV = {
+  A: 'una parada completa, hasta el cierre del speech',
+  R: 'contarte su speech entero y que le salga como lo ha preparado',
+  T: 'explicarte con sus palabras la estructura del speech y verla funcionar en una parada',
+  P: 'aplicar en una parada la técnica del día y ver que funciona'
+};
+var DIAS = [
+  'Contacto diario breve (5–7 minutos).',
+  'Una micro-victoria por turno: primero emocional, luego técnica.',
+  'Feedback simple, concreto y accionable.',
+  'Normaliza lo que siente: «esto es lo normal en el día 3, vas bien».',
+  'Cero comparaciones.',
+  'Control de volumen sin juicio.',
+  'Que se vaya sabiendo qué tiene que hacer mañana.'
+];
+var DIAS_NOTA = 'Señal de que va bien en estos días: empieza a intentarlo.';
+/* Señales que el RE puede ver a media mañana (de la actividad rápida de la presentación) y qué hacer: propuestas pendientes de revisar. */
+var SIG = [
+  {t:'Evita parar: baja la mirada y se pasa de largo.', h:'Suele ser miedo, no desgana. Haz tú la siguiente parada con él al lado y luego déjale una suya con una frase corta ya preparada. Valora que lo intente, no que consiga firma.'},
+  {t:'Se queda rígido y repite siempre lo mismo del speech.', h:'Es normal el primer día: se agarra a lo que sabe. Déjale decirlo igual y pídele solo una cosa nueva: escuchar la respuesta del socio antes de seguir.'},
+  {t:'Hace muy pocas paradas (volumen muy bajo).', h:'Controla el volumen sin juzgar: contad juntos las paradas y poned una meta pequeña y concreta para la siguiente hora. Comprueba si es miedo o si no sabe cómo empezar.'},
+  {t:'Se pone nervioso con los «no» y deja de intentarlo.', h:'Normaliza el «no»: es lo habitual y no dice nada de él. Haz tú la siguiente parada para que vea cómo llevas un «no» y vuelve con él a una parada fácil.'},
+  {t:'No pregunta nada aunque se le ve perdido.', h:'Suele ser vergüenza. No le preguntes «¿tienes dudas?»: cuéntale una duda típica de otro nuevo o pregúntale qué le diría él a un socio que pone una objeción concreta.'},
+  {t:'Habla demasiado rápido y no deja pensar al socio.', h:'Trabaja una sola cosa: una pausa tras la pregunta. Haz tú el ejemplo en voz alta y practicadlo una vez antes de la siguiente parada.'},
+  {t:'Se bloquea tras un «no» duro y quiere parar el turno.', h:'No dejes que pare sin una victoria pequeña: haz tú la siguiente parada, vuelve con él a una fácil y cierra el tramo con algo que sí ha salido bien. Dile que es normal y que estás a su lado.'}
+];
+var OBS = [
+  {k:'A', t:'Quiere salir ya a probar y se impacienta con las explicaciones largas.'},
+  {k:'R', t:'Prefiere mirar y escuchar antes de lanzarse y piensa antes de actuar.'},
+  {k:'T', t:'Pregunta por qué y pide información antes de actuar.'},
+  {k:'P', t:'Pide cosas concretas para usar ya: frases, trucos o listas.'},
+  {k:'', t:'Todavía no lo sé.'}
+];
 
 var QB = [
   {t: 'Es tu primer día en la calle. ¿Qué te gustaría que pasara primero?', o: {
@@ -450,16 +488,19 @@ function buildFicha(s){
   if (pf.tipo==='par' && counts[pf.items[0]]===counts[pf.items[1]] && pf.items[1]===s.m[0]) pf.items.reverse();
   var conf = confianza(s, pf);
   var nivel = guiaNivel(s.exp, s.comp);
-  var empieza = pf.tipo==='sin'
+  /* Lo que ve el RE a media mañana manda: si no coincide con la ficha, se usan los consejos del estilo que ve */
+  var obs = s.adj && s.adj.o && pf.items.indexOf(s.adj.o) < 0 ? s.adj.o : null;
+  var vig = obs ? [obs] : pf.items;
+  var empieza = vig.length === 0
     ? 'Que te vea hacerlo 20–30 minutos y que practique enseguida una sola técnica. Observa qué te pide y decide por lo que veas.'
-    : pf.tipo==='par'
-      ? 'Empieza por el estilo ' + ST[pf.items[0]].name + '. ' + ST[pf.items[0]].primeras + ' Después prueba con el estilo ' + ST[pf.items[1]].name + '. ' + ST[pf.items[1]].primeras
-      : ST[pf.items[0]].primeras;
+    : (!obs && pf.tipo==='par')
+      ? 'Empieza por el estilo ' + ST[vig[0]].name + '. ' + ST[vig[0]].primeras + ' Después prueba con el estilo ' + ST[vig[1]].name + '. ' + ST[vig[1]].primeras
+      : (obs ? 'Según lo que ves (' + ST[obs].name + '): ' : '') + ST[vig[0]].primeras;
   var ajustes = [GUIA[nivel]];
   if (s.conf <= 2) ajustes.push('Seguridad baja: empieza con metas pequeñas y alcanzables, y cuéntale qué se espera en estas primeras horas.');
   else if (s.conf >= 4) ajustes.push('Seguridad alta: comprueba que domina lo básico antes de soltarle (mira las comprobaciones de abajo).');
   ajustes.push(WORRY[s.worry].texto);
-  var senales = pf.items.map(function(k){ return ST[k].senales[0]; });
+  var senales = vig.map(function(k){ return ST[k].senales[0]; });
   var senal = senales[0] || null;
   var nota = null;
   if (pf.tipo==='ligera') nota = 'Inclinación ligera: tómalo como hipótesis y comprueba qué consejos de esta tarjeta le funcionan.';
@@ -480,18 +521,51 @@ function buildFicha(s){
   ];
   if (conf.nivel) facts.push(['Fiabilidad de este resultado', conf.nivel==='alta' ? 'Alta: las respuestas son coherentes entre sí' : conf.nivel==='media' ? 'Media: tómalo como punto de partida' : 'Baja: respuestas contradictorias o poco consistentes']);
   return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
-          estilos:pf.items.map(function(k){ return ST[k]; }), pf:pf, counts:counts};
+          estilos:vig.map(function(k){ return ST[k]; }), vig:vig, pf:pf, counts:counts, adj:s.adj||null};
 }
 
+function planDia(f){
+  var k = f.vig[0], mv = MV[k] || 'una parada hecha, salga o no la firma';
+  return [
+    ['Antes de salir (5 min)', 'Cuéntale cómo va a ser el día y que sentirse perdido hoy es normal. Acordad una micro-victoria para hoy: primero una emocional (que sienta que puede) y luego una técnica: ' + mv + '.'],
+    ['Primeras 2 horas', 'Sigue «Empieza por esto». Que observe a los demás para aprender, no para medirse: cero comparaciones. Controla el volumen sin juzgar.'],
+    ['Media mañana', 'Pulsa «Ajustar con lo que ves» y marca lo que observas. Si lo que ves no encaja con la ficha, manda lo que ves.'],
+    ['Al cerrar el día (5–7 min)', 'Dile una cosa que ha salido bien y una para mejorar, y acordad qué hará mañana: que se vaya sabiendo qué tiene que hacer.']
+  ];
+}
+function ajusteInfo(f){
+  if (!f.adj) return null;
+  var o = f.adj.o, items = f.pf.items, names = items.map(function(k){ return ST[k].name; }).join(' y ');
+  var estilo;
+  if (!o) estilo = 'Todavía no sabes qué estilo ves: sigue con la ficha y vuelve a comprobarlo más tarde.';
+  else if (!items.length) estilo = 'La ficha no marcaba un estilo y tú ves el estilo ' + ST[o].name + ': úsalo como punto de partida.';
+  else if (items.indexOf(o) >= 0) estilo = 'Lo que ves (' + ST[o].name + ') coincide con la ficha. Sigue como hasta ahora.';
+  else estilo = 'Lo que ves (' + ST[o].name + ') no coincide con la ficha (' + names + '). Manda lo que ves: usa los consejos del estilo ' + ST[o].name + '.';
+  var hechas = SIG.filter(function(x,i){ return f.adj.s.charAt(i) === '1'; });
+  return {estilo:estilo, usaObs: !!o && items.indexOf(o) < 0, o:o, senales:hechas};
+}
 function toText(f){
   var L = [];
   L.push('FICHA DE ACOGIDA · ' + f.nombre.toUpperCase());
   L.push(f.fecha + (f.re ? ' · RE: ' + f.re : ''));
   L.push('');
   f.facts.forEach(function(x){ L.push(x[0] + ': ' + x[1]); });
+  var aj = ajusteInfo(f);
+  if (aj){
+    L.push(''); L.push('AJUSTE DE MEDIA MAÑANA'); L.push(aj.estilo);
+    if (aj.senales.length){ L.push('Señales vistas y qué hacer:'); aj.senales.forEach(function(x){ L.push('- ' + x.t + ' → ' + x.h); }); }
+    else L.push('No has marcado ninguna señal de alarma: sigue con el plan.');
+  }
   L.push('');
   L.push('EMPIEZA POR ESTO');
   L.push(f.empieza);
+  L.push('');
+  L.push('PLAN DEL PRIMER DÍA');
+  planDia(f).forEach(function(x){ L.push('- ' + x[0] + ': ' + x[1]); });
+  L.push('');
+  L.push('DÍAS 1 A 5, CADA DÍA');
+  DIAS.forEach(function(a){ L.push('- ' + a); });
+  L.push(DIAS_NOTA);
   L.push('');
   L.push('TRES COSAS PARA HOY');
   f.ajustes.forEach(function(a){ L.push('- ' + a); });
@@ -534,12 +608,14 @@ function b64dec(s){
 function isoToday(){ var d = new Date(); function z(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}); }
 function encodeState(s){
-  return 'v4.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:isoToday()}));
+  var o = {n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:s.iso || isoToday()};
+  if (s.adj) o.a = {o:s.adj.o, s:s.adj.s};
+  return 'v5.' + b64enc(JSON.stringify(o));
 }
 function decodeState(hash){
   try{
     var h = String(hash||'').replace(/^#/,'');
-    if (h.indexOf('v4.') !== 0) return null;
+    if (h.indexOf('v5.') !== 0 && h.indexOf('v4.') !== 0) return null;
     var o = JSON.parse(b64dec(h.slice(3)));
     if (!o || typeof o !== 'object') return null;
     var nombre = String(o.n||'').trim().slice(0,60), re = String(o.r||'').trim().slice(0,60);
@@ -549,7 +625,9 @@ function decodeState(hash){
     if (!/^[ARTP]{14}$/.test(m) || !/^[ARTP]{14}$/.test(l) || !/^[1-5]{12}$/.test(k)) return null;
     for (var q=0;q<14;q++) if (m.charAt(q)===l.charAt(q)) return null;
     var d = /^\d{4}-\d{2}-\d{2}$/.test(String(o.d)) ? String(o.d) : isoToday();
-    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d)};
+    var adj = null;
+    if (o.a && typeof o.a === 'object' && (o.a.o===''||o.a.o==='A'||o.a.o==='R'||o.a.o==='T'||o.a.o==='P') && /^[01]{7}$/.test(String(o.a.s))) adj = {o:o.a.o, s:String(o.a.s)};
+    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d), iso:d, adj:adj};
   }catch(e){ return null; }
 }
 function baseUrl(){ return location.href.split('#')[0]; }
@@ -765,25 +843,38 @@ function printFicha(f){
 }
 
 /* Ficha del RE: se abre desde el enlace */
+function cardHtml(e){
+  return '<div class="card"><h3>'+esc(e.name)+'</h3><p>'+esc(e.aprende)+'</p>'+
+    '<h4>Cómo explicarle</h4>'+listHtml(e.explicar)+
+    '<h4>Feedback</h4><p>'+esc(e.feedback)+'</p>'+
+    '<h4>Señales y qué hacer</h4>'+sigHtml(e.senales)+
+    (e.nota ? '<p class="muted small" style="margin-top:10px">'+esc(e.nota)+'</p>' : '')+'</div>';
+}
+function ajusteHtml(f){
+  var aj = ajusteInfo(f);
+  if (!aj) return '';
+  return '<section class="sec ajuste"><h2>Ajuste de media mañana</h2><p class="hyp">'+esc(aj.estilo)+'</p>'+
+    (aj.senales.length ? '<h3>Señales que has visto</h3><ul class="sig">'+aj.senales.map(function(x){ return '<li><b>'+esc(x.t)+'</b> '+esc(x.h)+'</li>'; }).join('')+'</ul>'
+                       : '<p>No has marcado ninguna señal de alarma: sigue con el plan.</p>')+
+    (aj.usaObs ? '<p class="muted small">«Empieza por esto» y «Cómo enseñarle» ya usan el estilo ' + esc(ST[aj.o].name) + '.</p>' : '')+
+    '</section>';
+}
 function viewFicha(st){
   tagEl.textContent = 'Ficha para el RE';
   setProgress(TOTAL-1);
   var f = buildFicha(st);
-  var cards = f.pf.tipo==='sin'
+  var cards = !f.estilos.length
     ? '<div class="card"><h3>Sin preferencia clara</h3><p>Usa la base común, observa cómo reacciona y ajusta según lo que veas.</p></div>'
-    : f.estilos.map(function(e){
-        return '<div class="card"><h3>'+esc(e.name)+'</h3><p>'+esc(e.aprende)+'</p>'+
-          '<h4>Cómo explicarle</h4>'+listHtml(e.explicar)+
-          '<h4>Feedback</h4><p>'+esc(e.feedback)+'</p>'+
-          '<h4>Señales y qué hacer</h4>'+sigHtml(e.senales)+
-          (e.nota ? '<p class="muted small" style="margin-top:10px">'+esc(e.nota)+'</p>' : '')+'</div>';
-      }).join('');
+    : f.estilos.map(cardHtml).join('');
   app.innerHTML =
    '<p class="eyebrow">Ficha para el RE · '+esc(f.fecha)+'</p>'+
    '<h1>Cómo enseñar a '+esc(f.nombre)+'</h1>'+
    (f.re ? '<p class="muted" style="margin-top:10px">Para: '+esc(f.re)+'</p>' : '')+
    '<div class="facts">'+f.facts.map(function(x){ return '<div class="fact"><span class="k">'+esc(x[0])+'</span><span class="v">'+esc(x[1])+'</span></div>'; }).join('')+'</div>'+
+   ajusteHtml(f)+
    '<div class="action"><span class="k">Empieza por esto</span><p>'+esc(f.empieza)+'</p></div>'+
+   '<section class="sec"><h2>Plan del primer día</h2><p class="muted small">La persona nueva copia tu energía, no tus palabras.</p>'+sigHtml(planDia(f))+'</section>'+
+   '<section class="sec"><h2>Días 1 a 5, cada día</h2>'+listHtml(DIAS)+'<p class="muted small" style="margin-top:8px">'+esc(DIAS_NOTA)+'</p></section>'+
    '<section class="sec"><h2>Tres cosas para hoy</h2>'+listHtml(f.ajustes)+'</section>'+
    (f.senales.length ? '<section class="sec"><h2>'+(f.senales.length>1 ? 'Señales a vigilar' : 'Una señal a vigilar')+'</h2>'+sigHtml(f.senales)+'</section>' : '')+
    '<details class="fold"><summary>Cómo enseñarle</summary><div class="inner">'+(f.nota ? '<p class="hyp">'+esc(f.nota)+'</p>' : '')+'<div class="cards">'+cards+'</div></div></details>'+
@@ -791,12 +882,46 @@ function viewFicha(st){
    '<details class="fold"><summary>Comprueba hoy</summary><div class="inner">'+listHtml(COMPRUEBA)+'</div></details>'+
    '<p class="note">'+esc(AVISO)+'</p>'+
    '<div class="closing">Manda lo que ves hoy, no la ficha.</div>'+
-   '<div class="row" style="margin-top:24px"><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-primary" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
+   '<div class="row" style="margin-top:24px"><button class="btn btn-primary" id="adj" type="button">'+(f.adj ? 'Cambiar el ajuste' : 'Ajustar con lo que ves')+'</button><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-ghost" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
    '<p class="status" id="status" role="status"></p>'+VALS;
   var txt = toText(f);
+  document.getElementById('adj').onclick = function(){ viewAjuste(st); };
   document.getElementById('copy').onclick = function(){ copyText(txt, document.getElementById('status'), 'Ficha copiada. Ya puedes pegarla donde quieras.'); };
   document.getElementById('pdf').onclick = function(){ printFicha(f); };
   document.getElementById('again').onclick = function(){ S = newState(); location.hash = ''; route(); };
+  focusTop();
+}
+
+/* Ajuste a media mañana: lo que ve el RE manda sobre la ficha. El ajuste viaja en el enlace, no se guarda en ningún sitio. */
+function viewAjuste(st){
+  tagEl.textContent = 'Ajuste';
+  var f = buildFicha(st), cur = st.adj || {o:null, s:'0000000'};
+  app.innerHTML =
+   '<div class="narrow">'+
+   '<p class="eyebrow">Media mañana</p>'+
+   '<h1>Ajusta la ficha con lo que ves</h1>'+
+   '<p class="lead" style="margin-top:16px">Lo que ves hoy manda sobre la ficha. Marca lo que has observado de '+esc(f.nombre)+'.</p>'+
+   '<fieldset style="margin-top:24px"><legend>¿Qué ves en cómo aprende hoy?</legend><div class="opts">'+
+     OBS.map(function(x){ return opt('obs', x.k||'none', x.t, cur.o === x.k || (cur.o === null && false)); }).join('')+
+   '</div></fieldset>'+
+   '<fieldset><legend>¿Has visto alguna de estas señales?</legend><div class="opts">'+
+     SIG.map(function(x,i){ return '<label class="opt check"><input type="checkbox" name="sig" value="'+i+'"'+(cur.s.charAt(i)==='1'?' checked':'')+'><span class="dot" aria-hidden="true"></span><span class="txt">'+esc(x.t)+'</span></label>'; }).join('')+
+   '</div></fieldset>'+
+   '<p class="err" id="err" role="alert"></p>'+
+   '<div class="row"><button class="btn btn-primary" id="apply" type="button">Aplicar a la ficha</button><button class="back" id="cancel" type="button">Volver sin cambios</button></div>'+
+   '<p class="muted small" style="margin-top:12px">Las sugerencias son orientativas. Tu criterio manda.</p>'+
+   '</div>';
+  document.getElementById('cancel').onclick = function(){ viewFicha(st); };
+  document.getElementById('apply').onclick = function(){
+    var sel = app.querySelector('input[name="obs"]:checked');
+    if (!sel){ document.getElementById('err').textContent = 'Elige qué ves en cómo aprende (o «Todavía no lo sé»).'; return; }
+    var bits = '';
+    Array.prototype.forEach.call(app.querySelectorAll('input[name="sig"]'), function(c){ bits += c.checked ? '1' : '0'; });
+    var nuevo = {}; for (var k in st) nuevo[k] = st[k];
+    nuevo.adj = {o: sel.value === 'none' ? '' : sel.value, s: bits};
+    var h = '#' + encodeState(nuevo);
+    if (location.hash === h) route(); else location.hash = h;
+  };
   focusTop();
 }
 
@@ -806,7 +931,7 @@ function route(){
 }
 window.addEventListener('hashchange', route);
 
-window.__ficha = {profile:profile, buildFicha:buildFicha, toText:toText, guiaNivel:guiaNivel, encodeState:encodeState, decodeState:decodeState, prefLabel:prefLabel, ST:ST};
+window.__ficha = {planDia:planDia, ajusteInfo:ajusteInfo, SIG:SIG, OBS:OBS, profile:profile, buildFicha:buildFicha, toText:toText, guiaNivel:guiaNivel, encodeState:encodeState, decodeState:decodeState, prefLabel:prefLabel, ST:ST};
 route();
 </script>
 </body>
