@@ -73,6 +73,22 @@ legend{padding:0;margin:0 0 12px;font-weight:700;font-size:20px;line-height:1.3}
 .scale-ends{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:17px;margin-top:6px}
 .err{color:var(--red-text);font-weight:600;margin:0 0 14px;min-height:1.5em}
 
+
+/* Mejor / peor */
+.bws{display:grid;gap:10px}
+.bw{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;border:2px solid var(--line);border-radius:var(--r);background:var(--surface);min-width:0}
+.bw .txt{min-width:0;flex:1}
+.bw:has(input:checked){border-color:var(--ink)}
+.chips{display:flex;gap:6px;flex:none}
+.chip{position:relative;display:block;cursor:pointer}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:flex;align-items:center;justify-content:center;min-width:64px;min-height:48px;padding:0 10px;border:2px solid var(--line);border-radius:var(--r);background:var(--bg);font-family:var(--f-display);font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:19px;line-height:1}
+.chip-m:has(input:checked) span{background:var(--red);border-color:var(--red);color:#fff}
+.chip-l:has(input:checked) span{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip:hover span{border-color:var(--red)}
+.chip:has(input:focus-visible) span{outline:3px solid var(--focus);outline-offset:2px}
+@media (max-width:480px){.bw{flex-direction:column;align-items:stretch}.chips{justify-content:flex-end}.chip span{min-width:88px}}
+
 /* Botones */
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
 .btn{font-family:var(--f-display);font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:22px;line-height:1;padding:14px 22px;min-height:52px;border-radius:var(--r);border:2px solid transparent;cursor:pointer}
@@ -276,7 +292,7 @@ var COMPRUEBA = [
   'Observa sus tres primeras paradas y apunta qué hace cuando se atasca.',
   'A media mañana pregúntale qué le ayuda y qué le estorba. Si lo que ves no encaja con esta ficha, manda lo que ves.'
 ];
-var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 6 situaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
+var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 8 situaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
 
 var QB = [
   {t: 'Es tu primer día en la calle. ¿Qué te gustaría que pasara primero?', o: {
@@ -308,41 +324,57 @@ var QB = [
     A: 'Cuando tengo que estar mucho rato escuchando o analizando, sin hacer nada.',
     R: 'Cuando me ponen en el centro de la atención o me meten prisa.',
     T: 'Cuando me piden actuar sin entender la lógica de lo que hago.',
-    P: 'Cuando lo que me explican no se parece a la realidad o no sé para qué sirve.'}}
+    P: 'Cuando lo que me explican no se parece a la realidad o no sé para qué sirve.'}},
+  {t: 'Te enseñan una técnica nueva para negociar la cuota. ¿Cómo te encaja más?', o: {
+    A: 'Probarla ya con el siguiente socio y ajustarla sobre la marcha.',
+    R: 'Ver primero cómo la usa mi RE o un compañero y pensarla antes de usarla.',
+    T: 'Entender por qué funciona y en qué se basa antes de usarla.',
+    P: 'Que me la expliquen en un paso y practicarla enseguida con un caso real.'}},
+  {t: 'Quieres prepararte para salir mañana. ¿Qué haces?', o: {
+    A: 'Nada especial: salgo y aprendo sobre la marcha.',
+    R: 'Escucho a otros compañeros contar cómo les fue y lo voy pensando.',
+    T: 'Repaso la información de la ONG y la estructura del speech.',
+    P: 'Apunto las dos o tres cosas más útiles para usar mañana.'}}
 ];
 
 /* ===== Lógica ===== */
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
-/* Niveles: claro (4+ de 6, un solo estilo), ligera (3 de 6, un solo estilo),
-   par (3 y 3), sin (empate de 3 o más, o ningún estilo llega a 3). */
-function profile(counts){
-  var keys = ['A','R','T','P'];
-  var max = Math.max.apply(null, keys.map(function(k){ return counts[k]||0; }));
-  var top = keys.filter(function(k){ return (counts[k]||0) === max; });
-  if (max <= 2 || top.length >= 3) return {tipo:'sin', max:max, items:[]};
-  if (top.length === 2) return {tipo:'par', max:max, items:top};
-  return {tipo: max >= 4 ? 'claro' : 'ligera', max:max, items:top};
+/* Cada situación suma +1 al estilo marcado como "más como yo" y −1 al marcado como "menos" (de −8 a +8).
+   claro: 4 o más y 3 de ventaja; par: dos estilos a menos de 2 puntos y ambos con 3 o más;
+   sin preferencia: el primero no llega a 3 o hay tres estilos a menos de 2 puntos; ligera: el resto. */
+function scoresOf(s){
+  var sc = {A:0,R:0,T:0,P:0};
+  s.m.forEach(function(k){ if(k) sc[k]++; });
+  s.l.forEach(function(k){ if(k) sc[k]--; });
+  return sc;
+}
+function profile(sc){
+  var keys = ['A','R','T','P'].sort(function(a,b){ return sc[b]-sc[a]; });
+  var s1 = sc[keys[0]], s2 = sc[keys[1]], s3 = sc[keys[2]];
+  if (s1 <= 2 || s1 - s3 <= 1) return {tipo:'sin', max:s1, items:[], scores:sc};
+  if (s1 - s2 <= 1 && s2 >= 3) return {tipo:'par', max:s1, items:[keys[0],keys[1]], scores:sc};
+  return {tipo: (s1 >= 4 && s1 - s2 >= 3) ? 'claro' : 'ligera', max:s1, items:[keys[0]], scores:sc};
 }
 function guiaNivel(exp, comp){
   if (exp==='none' || comp==='low') return 'alta';
   if (exp==='lots' && comp==='high') return 'baja';
   return 'media';
 }
-function prefLabel(pf, counts){
+function sg(n){ return (n>0?'+':n<0?'\u2212':'') + Math.abs(n); }
+function prefLabel(pf){
   if (pf.tipo==='sin') return 'Sin preferencia clara';
-  var n = ST[pf.items[0]].name;
-  if (pf.tipo==='claro') return n + ' (claro, ' + pf.max + ' de 6)';
-  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + pf.max + ' de 6)';
-  return ST[pf.items[0]].name + ' y ' + ST[pf.items[1]].name + ' a la par (' + pf.max + ' y ' + pf.max + ' de 6)';
+  var n = ST[pf.items[0]].name, sc = pf.scores;
+  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 8)';
+  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + sg(sc[pf.items[0]]) + ' de 8)';
+  return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 8)';
 }
 
 function buildFicha(s){
-  var counts = {A:0,R:0,T:0,P:0};
-  s.b.forEach(function(k){ if(k) counts[k]++; });
+  var counts = scoresOf(s);
   var pf = profile(counts);
   /* Dos estilos a la par: va primero el que marcó en la situación 1 (qué le gustaría que pasara primero) */
-  if (pf.tipo==='par' && pf.items.indexOf(s.b[0])===1) pf.items.reverse();
+  if (pf.tipo==='par' && counts[pf.items[0]]===counts[pf.items[1]] && pf.items[1]===s.m[0]) pf.items.reverse();
   var nivel = guiaNivel(s.exp, s.comp);
   var empieza = pf.tipo==='sin'
     ? 'Que te vea hacerlo 20–30 minutos y que practique enseguida una sola técnica. Observa qué te pide y decide por lo que veas.'
@@ -364,7 +396,7 @@ function buildFicha(s){
     ['Formación inicial', COMP[s.comp]],
     ['Seguridad para empezar', s.conf + ' de 5'],
     ['Le preocupa', WORRY[s.worry].short],
-    ['Preferencia orientativa', prefLabel(pf, counts)]
+    ['Preferencia orientativa', prefLabel(pf)]
   ];
   return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
           estilos:pf.items.map(function(k){ return ST[k]; }), pf:pf, counts:counts};
@@ -421,21 +453,22 @@ function b64dec(s){
 function isoToday(){ var d = new Date(); function z(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}); }
 function encodeState(s){
-  return 'v1.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, b:s.b.join(''), d:isoToday()}));
+  return 'v2.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), d:isoToday()}));
 }
 function decodeState(hash){
   try{
     var h = String(hash||'').replace(/^#/,'');
-    if (h.indexOf('v1.') !== 0) return null;
+    if (h.indexOf('v2.') !== 0) return null;
     var o = JSON.parse(b64dec(h.slice(3)));
     if (!o || typeof o !== 'object') return null;
     var nombre = String(o.n||'').trim().slice(0,60), re = String(o.r||'').trim().slice(0,60);
-    var b = String(o.b||'');
+    var m = String(o.m||''), l = String(o.l||'');
     if (!nombre || !EXP[o.e] || !COMP[o.c] || !WORRY[o.w]) return null;
     if (!(o.f===1||o.f===2||o.f===3||o.f===4||o.f===5)) return null;
-    if (!/^[ARTP]{6}$/.test(b)) return null;
+    if (!/^[ARTP]{8}$/.test(m) || !/^[ARTP]{8}$/.test(l)) return null;
+    for (var q=0;q<8;q++) if (m.charAt(q)===l.charAt(q)) return null;
     var d = /^\d{4}-\d{2}-\d{2}$/.test(String(o.d)) ? String(o.d) : isoToday();
-    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, b:b.split(''), fecha:fmtDate(d)};
+    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), fecha:fmtDate(d)};
   }catch(e){ return null; }
 }
 function baseUrl(){ return location.href.split('#')[0]; }
@@ -446,8 +479,8 @@ var app = document.getElementById('app');
 var bar = document.getElementById('bar');
 var barwrap = document.getElementById('barwrap');
 var tagEl = document.getElementById('tag');
-var TOTAL = 8;
-function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, b:[null,null,null,null,null,null], order:[]}; }
+var TOTAL = 11;
+function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null], order:[]}; }
 var S = newState();
 
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -477,7 +510,7 @@ function viewIntro(){
    '<div class="narrow">'+
    '<p class="eyebrow">Ficha de acogida</p>'+
    '<h1>Cuéntanos cómo aprendes</h1>'+
-   '<p class="lead" style="margin-top:16px">Son 3 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
+   '<p class="lead" style="margin-top:16px">Son unos 5 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
    '<p class="muted small">Tus respuestas no se guardan en ningún sitio. Solo se envían a tu RE si tú pulsas el botón al final.</p>'+
    '<div class="field" style="margin-top:24px"><label class="lbl" for="nombre">Tu nombre</label><input type="text" id="nombre" autocomplete="given-name" maxlength="60" value="'+esc(S.nombre)+'"></div>'+
    '<div class="field"><label class="lbl" for="re">Nombre de tu RE <span class="muted" style="font-weight:400">(opcional)</span></label><input type="text" id="re" maxlength="60" value="'+esc(S.re)+'"></div>'+
@@ -497,7 +530,7 @@ function viewA(){
   setProgress(1);
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso 1 de 7 · Tu punto de partida</p>'+
+   '<p class="qcount">Paso 1 de 9 · Tu punto de partida</p>'+
    '<h1 class="q-title" style="font-size:clamp(34px,8vw,52px)">Para empezar</h1>'+
    '<fieldset><legend>¿Has captado o vendido antes cara a cara?</legend><div class="opts">'+
      opt('exp','none','No, es la primera vez',S.exp==='none')+opt('exp','some','Algo (menos de 6 meses)',S.exp==='some')+opt('exp','lots','Sí, más de 6 meses',S.exp==='lots')+
@@ -535,23 +568,36 @@ function viewA(){
 
 function viewB(i){
   setProgress(2+i);
-  var q = QB[i], ord = S.order[i];
+  var q = QB[i], ord = S.order[i], N = QB.length;
+  function chip(g, k, txt, lab){ return '<label class="chip chip-'+g+'"><input type="radio" name="'+g+'" value="'+k+'"'+(S[g][i]===k?' checked':'')+' aria-label="'+lab+': '+esc(txt)+'"><span>'+(g==='m'?'Más':'Menos')+'</span></label>'; }
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso '+(i+2)+' de 7 · Cómo aprendes · '+(i+1)+'/6</p>'+
-   '<fieldset><legend class="q-title">'+esc(q.t)+'<span class="q-hint">Elige la que más se parezca a ti.</span></legend><div class="opts">'+
-     ord.map(function(k){ return opt('b', k, q.o[k], S.b[i]===k); }).join('')+
+   '<p class="qcount">Paso '+(i+2)+' de '+(N+1)+' · Cómo aprendes · '+(i+1)+'/'+N+'</p>'+
+   '<fieldset><legend class="q-title">'+esc(q.t)+'<span class="q-hint">Marca una como la que más se parece a ti y otra como la que menos.</span></legend><div class="bws">'+
+     ord.map(function(k){ var t = q.o[k];
+       return '<div class="bw"><span class="txt">'+esc(t)+'</span><span class="chips">'+chip('m',k,t,'Más se parece a mí')+chip('l',k,t,'Menos se parece a mí')+'</span></div>'; }).join('')+
    '</div></fieldset>'+
    '<p class="err" id="err" role="alert"></p>'+
-   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(i===5?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
+   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(i===N-1?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
    '</div>';
-  Array.prototype.forEach.call(app.querySelectorAll('input[name="b"]'), function(inp){
-    inp.onchange = function(){ S.b[i] = inp.value; document.getElementById('err').textContent = ''; };
+  function other(g){ return g==='m' ? 'l' : 'm'; }
+  ['m','l'].forEach(function(g){
+    Array.prototype.forEach.call(app.querySelectorAll('input[name="'+g+'"]'), function(inp){
+      inp.onchange = function(){
+        S[g][i] = inp.value;
+        var o = other(g);
+        if (S[o][i] === inp.value){
+          S[o][i] = null;
+          Array.prototype.forEach.call(app.querySelectorAll('input[name="'+o+'"]'), function(x){ x.checked = false; });
+        }
+        document.getElementById('err').textContent = '';
+      };
+    });
   });
   document.getElementById('back').onclick = function(){ if(i===0) viewA(); else viewB(i-1); };
   document.getElementById('next').onclick = function(){
-    if(!S.b[i]){ document.getElementById('err').textContent = 'Elige una opción para continuar.'; return; }
-    if(i<5) viewB(i+1); else viewDone();
+    if(!S.m[i] || !S.l[i]){ document.getElementById('err').textContent = !S.m[i] ? 'Marca cuál se parece más a ti.' : 'Marca cuál se parece menos a ti.'; return; }
+    if(i<N-1) viewB(i+1); else viewDone();
   };
   focusTop();
 }
@@ -593,7 +639,7 @@ function viewDone(){
     var msg = 'Ficha de acogida de ' + S.nombre + (S.re ? ' para ' + S.re : '') + ': ' + link;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
-  document.getElementById('back').onclick = function(){ viewB(5); };
+  document.getElementById('back').onclick = function(){ viewB(QB.length-1); };
   document.getElementById('again').onclick = function(){ S = newState(); viewIntro(); };
   focusTop();
 }
