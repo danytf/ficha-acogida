@@ -16,7 +16,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141212;--surface:#1E1B1B;--soft:#2A2626;--ink:#F2F0F0;--muted:#B8B1AB;--line:#3A3436;--stripe:#3A3436;--red-text:#FF7780;--tint:#2B1719;--ok:#2A9461;--focus:#F2F0F0;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#141212;--surface:#1E1B1B;--soft:#2A2626;--ink:#F2F0F0;--muted:#B8B1AB;--line:#3A3436;--stripe:#3A3436;--red-text:#FF7780;--tint:#2B1719;--ok:#2A9461;--focus:#F2F0F0;color-scheme:dark}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:96px}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:18px;line-height:1.5}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 h1:focus,.q-title:focus{outline:none}
@@ -293,69 +293,121 @@ var COMPRUEBA = [
   'Observa sus tres primeras paradas y apunta qué hace cuando se atasca.',
   'A media mañana pregúntale qué le ayuda y qué le estorba. Si lo que ves no encaja con esta ficha, manda lo que ves.'
 ];
-var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 8 situaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
+var AVISO = 'Orientativo: se basa en lo que la persona dice de sí misma en 12 situaciones y 8 afirmaciones; no es un diagnóstico ni mide su capacidad. No hay evidencia sólida de que enseñar según el estilo mejore por sí solo el aprendizaje: úsalo como punto de partida y corrige con lo que veas.';
 
 var QB = [
   {t: 'Es tu primer día en la calle. ¿Qué te gustaría que pasara primero?', o: {
     A: 'Salir ya a parar gente y que me corrijan sobre la marcha.',
     R: 'Ir un rato con mi RE viendo cómo lo hace antes de intentarlo.',
     T: 'Que me expliquen cómo está montada la conversación y por qué funciona.',
-    P: 'Que me den dos o tres frases claras para usar ya en la primera parada.'}},
+    P: 'Tener dos o tres frases claras que pueda usar ya en la primera parada.'}},
   {t: 'Alguien te pone una objeción que no sabes rebatir. ¿Qué haces después?', o: {
-    A: 'Pruebo otra respuesta con la siguiente persona, a ver qué tal.',
-    R: 'Pregunto a mi RE o a un compañero qué dice y lo pienso antes de volver a intentarlo.',
+    A: 'Pruebo otra respuesta con la siguiente persona, a ver qué tal me va.',
+    R: 'Pregunto a un compañero qué diría y lo pienso antes de intentarlo otra vez.',
     T: 'Intento entender por qué la gente la pone y qué hay detrás.',
-    P: 'Pido una lista de respuestas que funcionan y me quedo con la que mejor me encaje.'}},
+    P: 'Pido una lista de respuestas que funcionan y me quedo con la mejor.'}},
   {t: 'Tu RE quiere darte feedback. ¿Cómo prefieres recibirlo?', o: {
-    A: 'Justo al terminar la parada, en caliente.',
-    R: 'Con calma, después de haberlo pensado un rato.',
-    T: 'Con datos: paradas, formularios, porcentajes.',
-    P: 'Una sola cosa concreta para cambiar en la siguiente parada.'}},
+    A: 'Justo al terminar la parada, en caliente, mientras lo tengo fresco.',
+    R: 'Con calma, un rato después de haberlo pensado por mi cuenta.',
+    T: 'Con datos concretos del día: paradas, formularios, porcentajes y qué significan.',
+    P: 'Una sola cosa concreta y útil para cambiar en la siguiente parada.'}},
   {t: 'Tienes que aprender un proyecto nuevo de la ONG. ¿Cómo lo haces mejor?', o: {
-    A: 'Contándolo a alguien, aunque me equivoque.',
-    R: 'Escuchando cómo se lo cuentan otros compañeros a los socios.',
-    T: 'Leyendo la información de la ONG y estudiándola.',
-    P: 'Con una versión corta con lo esencial, para usarla ya.'}},
+    A: 'Contándoselo a alguien enseguida, aunque me equivoque varias veces al principio.',
+    R: 'Escuchando primero cómo se lo cuentan otros compañeros a los socios.',
+    T: 'Leyendo y estudiando a fondo toda la información que haya de la ONG.',
+    P: 'Con una versión corta con lo esencial, para poder usarla hoy mismo.'}},
   {t: 'Una mañana no te sale ninguna firma. ¿Qué te ayuda más?', o: {
-    A: 'Cambiar mi forma de abordar y seguir probando.',
+    A: 'Cambiar mi forma de abordar y seguir probando cosas distintas enseguida.',
     R: 'Que mi RE me observe un rato y me cuente lo que ve.',
-    T: 'Parar a revisar qué estoy haciendo y por qué no funciona.',
-    P: 'Que me den un truco concreto que pueda aplicar ya.'}},
+    T: 'Parar a revisar qué estoy haciendo y por qué no está funcionando.',
+    P: 'Que me den un truco concreto que pueda aplicar en la siguiente parada.'}},
   {t: '¿Cuándo te cuesta más aprender?', o: {
     A: 'Cuando tengo que estar mucho rato escuchando o analizando, sin hacer nada.',
     R: 'Cuando me ponen en el centro de la atención o me meten prisa.',
     T: 'Cuando me piden actuar sin entender la lógica de lo que hago.',
-    P: 'Cuando lo que me explican no se parece a la realidad o no sé para qué sirve.'}},
+    P: 'Cuando no veo para qué sirve lo que me explican o lo veo irreal.'}},
   {t: 'Te enseñan una técnica nueva para negociar la cuota. ¿Cómo te encaja más?', o: {
     A: 'Probarla ya con el siguiente socio y ajustarla sobre la marcha.',
-    R: 'Ver primero cómo la usa mi RE o un compañero y pensarla antes de usarla.',
+    R: 'Ver primero cómo la usa un compañero y pensarla antes de usarla.',
     T: 'Entender por qué funciona y en qué se basa antes de usarla.',
-    P: 'Que me la expliquen en un paso y practicarla enseguida con un caso real.'}},
+    P: 'Que me la expliquen en un paso y practicarla enseguida en la calle.'}},
   {t: 'Quieres prepararte para salir mañana. ¿Qué haces?', o: {
-    A: 'Nada especial: salgo y aprendo sobre la marcha.',
+    A: 'No preparo nada especial: salgo y aprendo sobre la marcha, probando cosas.',
     R: 'Escucho a otros compañeros contar cómo les fue y lo voy pensando.',
     T: 'Repaso la información de la ONG y la estructura del speech.',
-    P: 'Apunto las dos o tres cosas más útiles para usar mañana.'}}
+    P: 'Apunto las dos o tres cosas más útiles para usar mañana.'}},
+  {t: 'La ONG cambia una parte de su argumentario. ¿Qué haces?', o: {
+    A: 'Lo pruebo en la calle y veo cómo responde la gente.',
+    R: 'Escucho primero cómo lo cuentan otros compañeros antes de usarlo yo.',
+    T: 'Leo el cambio completo y entiendo bien qué lo ha motivado.',
+    P: 'Pido la versión corta con lo que cambia para usarla hoy.'}},
+  {t: 'Llegas a un equipo nuevo y no conoces a nadie. ¿Qué te ayuda más al principio?', o: {
+    A: 'Que me pongan a trabajar con alguien y empezar cuanto antes.',
+    R: 'Observar cómo trabaja el equipo unos días antes de implicarme.',
+    T: 'Conocer cómo funciona el equipo y qué se espera de mí.',
+    P: 'Saber qué tengo que hacer cada día para ser útil pronto.'}},
+  {t: 'Un compañero te cuenta un truco que le funciona. ¿Qué haces?', o: {
+    A: 'Lo pruebo en la siguiente parada y veo qué tal me sale.',
+    R: 'Le pido que me deje verlo en acción antes de probarlo yo.',
+    T: 'Le pregunto por qué cree que funciona y en qué se basa.',
+    P: 'Me quedo solo con la parte que puedo aplicar ya mismo.'}},
+  {t: 'Termina tu primer día. ¿Qué te dejaría más satisfecho?', o: {
+    A: 'Haber hecho muchas paradas, aunque no todas hayan salido bien.',
+    R: 'Haber visto cómo trabajan los demás y qué puedo mejorar.',
+    T: 'Haber entendido bien cómo funciona todo, aunque hayan salido pocas paradas.',
+    P: 'Haber conseguido algo concreto y útil que me sirva mañana mismo.'}}
+];
+
+/* Afirmaciones de acuerdo (1 a 5): dos por estilo, en este orden fijo. Sirven para confirmar o poner en duda el resultado de las situaciones. */
+var LK = [
+  {k:'A', t:'Prefiero probar algo yo mismo antes de que me lo expliquen todo.'},
+  {k:'A', t:'Aprendo más haciendo y equivocándome que escuchando explicaciones.'},
+  {k:'R', t:'Antes de actuar, me gusta ver cómo lo hacen otras personas.'},
+  {k:'R', t:'Necesito tiempo para pensar las cosas antes de dar una respuesta.'},
+  {k:'T', t:'Me ayuda entender el porqué de las cosas antes de hacerlas.'},
+  {k:'T', t:'Me siento más seguro cuando tengo la información completa y ordenada.'},
+  {k:'P', t:'Me quedo con lo que veo que puedo aplicar enseguida.'},
+  {k:'P', t:'Prefiero una solución concreta a una explicación general.'}
 ];
 
 /* ===== Lógica ===== */
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
-/* Cada situación suma +1 al estilo marcado como "más como yo" y −1 al marcado como "menos" (de −8 a +8).
-   claro: 4 o más y 3 de ventaja; par: dos estilos a menos de 2 puntos y ambos con 3 o más;
-   sin preferencia: el primero no llega a 3 o hay tres estilos a menos de 2 puntos; ligera: el resto. */
+/* Cada situación suma +1 al estilo marcado como "más como yo" y −1 al marcado como "menos" (de −12 a +12).
+   claro: 6 o más y 4 de ventaja; par: dos estilos a 1 punto o menos y ambos con 4 o más;
+   sin preferencia: el primero no llega a 4 o hay tres estilos a 1 punto de distancia; ligera: el resto. */
 function scoresOf(s){
   var sc = {A:0,R:0,T:0,P:0};
   s.m.forEach(function(k){ if(k) sc[k]++; });
   s.l.forEach(function(k){ if(k) sc[k]--; });
   return sc;
 }
+function lkMeans(s){
+  var t = {A:0,R:0,T:0,P:0}, n = {A:0,R:0,T:0,P:0};
+  LK.forEach(function(it,i){ if (s.lk && s.lk[i]) { t[it.k] += s.lk[i]; n[it.k]++; } });
+  var m = {}; ['A','R','T','P'].forEach(function(k){ m[k] = n[k] ? t[k]/n[k] : 0; });
+  return m;
+}
 function profile(sc){
   var keys = ['A','R','T','P'].sort(function(a,b){ return sc[b]-sc[a]; });
   var s1 = sc[keys[0]], s2 = sc[keys[1]], s3 = sc[keys[2]];
-  if (s1 <= 2 || s1 - s3 <= 1) return {tipo:'sin', max:s1, items:[], scores:sc};
-  if (s1 - s2 <= 1 && s2 >= 3) return {tipo:'par', max:s1, items:[keys[0],keys[1]], scores:sc};
-  return {tipo: (s1 >= 4 && s1 - s2 >= 3) ? 'claro' : 'ligera', max:s1, items:[keys[0]], scores:sc};
+  if (s1 <= 3 || s1 - s3 <= 1) return {tipo:'sin', max:s1, items:[], scores:sc};
+  if (s1 - s2 <= 1 && s2 >= 4) return {tipo:'par', max:s1, items:[keys[0],keys[1]], scores:sc};
+  return {tipo: (s1 >= 6 && s1 - s2 >= 4) ? 'claro' : 'ligera', max:s1, items:[keys[0]], scores:sc};
+}
+/* Fiabilidad de este resultado: ¿se contradicen las respuestas? ¿lo confirman las afirmaciones de 1 a 5? */
+function confianza(s, pf){
+  var most = {A:0,R:0,T:0,P:0}, least = {A:0,R:0,T:0,P:0};
+  s.m.forEach(function(k){ if(k) most[k]++; }); s.l.forEach(function(k){ if(k) least[k]++; });
+  var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 4 && least[k] >= 3; });
+  var lm = lkMeans(s);
+  var igual = s.lk.every(function(v){ return v === s.lk[0]; });
+  if (pf.tipo === 'sin') return {nivel: contradice ? 'baja' : null, contradice: contradice, igual: igual, lm: lm};
+  var avg = pf.items.reduce(function(a,k){ return a + lm[k]; }, 0) / pf.items.length;
+  var nivel = 'media';
+  if (contradice || avg <= 2.5) nivel = 'baja';
+  else if (avg >= 3.5 && !igual && (pf.tipo === 'claro' || pf.tipo === 'par')) nivel = 'alta';
+  return {nivel: nivel, contradice: contradice, igual: igual, avg: avg, lm: lm};
 }
 function guiaNivel(exp, comp){
   if (exp==='none' || comp==='low') return 'alta';
@@ -366,9 +418,9 @@ function sg(n){ return (n>0?'+':n<0?'\u2212':'') + Math.abs(n); }
 function prefLabel(pf){
   if (pf.tipo==='sin') return 'Sin preferencia clara';
   var n = ST[pf.items[0]].name, sc = pf.scores;
-  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 8)';
-  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + sg(sc[pf.items[0]]) + ' de 8)';
-  return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 8)';
+  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 12)';
+  if (pf.tipo==='ligera') return n + ' (inclinación ligera, ' + sg(sc[pf.items[0]]) + ' de 12)';
+  return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 12)';
 }
 
 function buildFicha(s){
@@ -376,6 +428,7 @@ function buildFicha(s){
   var pf = profile(counts);
   /* Dos estilos a la par: va primero el que marcó en la situación 1 (qué le gustaría que pasara primero) */
   if (pf.tipo==='par' && counts[pf.items[0]]===counts[pf.items[1]] && pf.items[1]===s.m[0]) pf.items.reverse();
+  var conf = confianza(s, pf);
   var nivel = guiaNivel(s.exp, s.comp);
   var empieza = pf.tipo==='sin'
     ? 'Que te vea hacerlo 20–30 minutos y que practique enseguida una sola técnica. Observa qué te pide y decide por lo que veas.'
@@ -392,6 +445,12 @@ function buildFicha(s){
   if (pf.tipo==='ligera') nota = 'Inclinación ligera: tómalo como hipótesis y comprueba qué consejos de esta tarjeta le funcionan.';
   else if (pf.tipo==='par') nota = 'Dos estilos a la par: va primero el que marcó al elegir qué le gustaría que pasara primero. Combina los consejos de ambas tarjetas y comprueba cuáles le funcionan.';
   else if (pf.tipo==='sin') nota = 'Sus respuestas no se inclinan hacia un estilo: usa la base común, observa cómo reacciona y ajusta según lo que veas.';
+  if (conf.nivel === 'baja') nota = (nota ? nota + ' ' : '') + 'Resultado poco fiable: ' + (conf.contradice ? 'hay respuestas que se contradicen' : 'las afirmaciones de 1 a 5 no lo confirman') + '. Usa la base común y fíate más de lo que veas.';
+  if (conf.igual) nota = (nota ? nota + ' ' : '') + 'Contestó igual a todas las afirmaciones de 1 a 5, así que no sirven para confirmar el resultado.';
+  if (pf.tipo === 'sin' && conf.nivel !== 'baja' && !conf.igual) {
+    var kk = ['A','R','T','P'].sort(function(a,b){ return conf.lm[b]-conf.lm[a]; });
+    if (conf.lm[kk[0]] >= 4 && conf.lm[kk[0]] - conf.lm[kk[1]] >= 1) nota = (nota ? nota + ' ' : '') + 'Las afirmaciones de 1 a 5 apuntan algo hacia el estilo ' + ST[kk[0]].name + ': compruébalo.';
+  }
   var facts = [
     ['Experiencia previa', EXP[s.exp].short],
     ['Formación inicial', COMP[s.comp]],
@@ -399,6 +458,7 @@ function buildFicha(s){
     ['Le preocupa', WORRY[s.worry].short],
     ['Preferencia orientativa', prefLabel(pf)]
   ];
+  if (conf.nivel) facts.push(['Fiabilidad de este resultado', conf.nivel==='alta' ? 'Alta: las respuestas son coherentes entre sí' : conf.nivel==='media' ? 'Media: tómalo como punto de partida' : 'Baja: respuestas contradictorias o poco consistentes']);
   return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
           estilos:pf.items.map(function(k){ return ST[k]; }), pf:pf, counts:counts};
 }
@@ -454,22 +514,22 @@ function b64dec(s){
 function isoToday(){ var d = new Date(); function z(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function fmtDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}); }
 function encodeState(s){
-  return 'v2.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), d:isoToday()}));
+  return 'v3.' + b64enc(JSON.stringify({n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:isoToday()}));
 }
 function decodeState(hash){
   try{
     var h = String(hash||'').replace(/^#/,'');
-    if (h.indexOf('v2.') !== 0) return null;
+    if (h.indexOf('v3.') !== 0) return null;
     var o = JSON.parse(b64dec(h.slice(3)));
     if (!o || typeof o !== 'object') return null;
     var nombre = String(o.n||'').trim().slice(0,60), re = String(o.r||'').trim().slice(0,60);
-    var m = String(o.m||''), l = String(o.l||'');
+    var m = String(o.m||''), l = String(o.l||''), k = String(o.k||'');
     if (!nombre || !EXP[o.e] || !COMP[o.c] || !WORRY[o.w]) return null;
     if (!(o.f===1||o.f===2||o.f===3||o.f===4||o.f===5)) return null;
-    if (!/^[ARTP]{8}$/.test(m) || !/^[ARTP]{8}$/.test(l)) return null;
-    for (var q=0;q<8;q++) if (m.charAt(q)===l.charAt(q)) return null;
+    if (!/^[ARTP]{12}$/.test(m) || !/^[ARTP]{12}$/.test(l) || !/^[1-5]{8}$/.test(k)) return null;
+    for (var q=0;q<12;q++) if (m.charAt(q)===l.charAt(q)) return null;
     var d = /^\d{4}-\d{2}-\d{2}$/.test(String(o.d)) ? String(o.d) : isoToday();
-    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), fecha:fmtDate(d)};
+    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d)};
   }catch(e){ return null; }
 }
 function baseUrl(){ return location.href.split('#')[0]; }
@@ -480,8 +540,8 @@ var app = document.getElementById('app');
 var bar = document.getElementById('bar');
 var barwrap = document.getElementById('barwrap');
 var tagEl = document.getElementById('tag');
-var TOTAL = 11;
-function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null], order:[]}; }
+var TOTAL = 17;
+function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null,null,null,null,null], lk:[null,null,null,null,null,null,null,null], order:[], lkOrder:[]}; }
 var S = newState();
 
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -511,7 +571,7 @@ function viewIntro(){
    '<div class="narrow">'+
    '<p class="eyebrow">Ficha de acogida</p>'+
    '<h1>Cuéntanos cómo aprendes</h1>'+
-   '<p class="lead" style="margin-top:16px">Son unos 5 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
+   '<p class="lead" style="margin-top:16px">Son unos 8 minutos. Con tus respuestas, tu RE sabrá cómo ayudarte desde la primera hora. No hay respuestas buenas ni malas, y no es una evaluación.</p>'+
    '<p class="muted small">Tus respuestas no se guardan en ningún sitio. Solo se envían a tu RE si tú pulsas el botón al final.</p>'+
    '<div class="field" style="margin-top:24px"><label class="lbl" for="nombre">Tu nombre</label><input type="text" id="nombre" autocomplete="given-name" maxlength="60" value="'+esc(S.nombre)+'"></div>'+
    '<div class="field"><label class="lbl" for="re">Nombre de tu RE <span class="muted" style="font-weight:400">(opcional)</span></label><input type="text" id="re" maxlength="60" value="'+esc(S.re)+'"></div>'+
@@ -531,7 +591,7 @@ function viewA(){
   setProgress(1);
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso 1 de 9 · Tu punto de partida</p>'+
+   '<p class="qcount">Paso 1 de '+(QB.length+3)+' · Tu punto de partida</p>'+
    '<h1 class="q-title" style="font-size:clamp(34px,8vw,52px)">Para empezar</h1>'+
    '<fieldset><legend>¿Has captado o vendido antes cara a cara?</legend><div class="opts">'+
      opt('exp','none','No, es la primera vez',S.exp==='none')+opt('exp','some','Algo (menos de 6 meses)',S.exp==='some')+opt('exp','lots','Sí, más de 6 meses',S.exp==='lots')+
@@ -562,6 +622,7 @@ function viewA(){
   document.getElementById('next').onclick = function(){
     if(!S.exp || !S.comp || !S.conf || !S.worry){ document.getElementById('err').textContent = 'Responde a las cuatro preguntas para continuar.'; return; }
     if(!S.order.length){ S.order = QB.map(function(){ return shuffle(['A','R','T','P']); }); }
+    if(!S.lkOrder.length){ S.lkOrder = shuffle([0,1,2,3,4,5,6,7]); }
     viewB(0);
   };
   focusTop();
@@ -573,14 +634,14 @@ function viewB(i){
   function chip(g, k, txt, lab){ return '<label class="chip chip-'+g+'"><input type="radio" name="'+g+'" value="'+k+'"'+(S[g][i]===k?' checked':'')+' aria-label="'+lab+': '+esc(txt)+'"><span>'+(g==='m'?'Más':'Menos')+'</span></label>'; }
   app.innerHTML =
    '<div class="narrow">'+
-   '<p class="qcount">Paso '+(i+2)+' de '+(N+1)+' · Cómo aprendes · '+(i+1)+'/'+N+'</p>'+
+   '<p class="qcount">Paso '+(i+2)+' de '+(N+3)+' · Cómo aprendes · '+(i+1)+'/'+N+'</p>'+
    '<h1 class="sr-only">Situación '+(i+1)+' de '+N+'</h1>'+
    '<fieldset><legend class="q-title">'+esc(q.t)+'<span class="q-hint">Marca una como la que más se parece a ti y otra como la que menos.</span></legend><div class="bws">'+
      ord.map(function(k){ var t = q.o[k];
        return '<div class="bw"><span class="txt">'+esc(t)+'</span><span class="chips">'+chip('m',k,t,'Más se parece a mí')+chip('l',k,t,'Menos se parece a mí')+'</span></div>'; }).join('')+
    '</div></fieldset>'+
    '<p class="err" id="err" role="alert"></p>'+
-   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(i===N-1?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
+   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+'Siguiente'+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
    '</div>';
   function other(g){ return g==='m' ? 'l' : 'm'; }
   ['m','l'].forEach(function(g){
@@ -599,7 +660,34 @@ function viewB(i){
   document.getElementById('back').onclick = function(){ if(i===0) viewA(); else viewB(i-1); };
   document.getElementById('next').onclick = function(){
     if(!S.m[i] || !S.l[i]){ document.getElementById('err').textContent = !S.m[i] ? 'Marca cuál se parece más a ti.' : 'Marca cuál se parece menos a ti.'; return; }
-    if(i<N-1) viewB(i+1); else viewDone();
+    if(i<N-1) viewB(i+1); else viewL(0);
+  };
+  focusTop();
+}
+
+function viewL(j){
+  setProgress(2+QB.length+j);
+  var N = QB.length, idx = S.lkOrder.slice(j*4, j*4+4);
+  app.innerHTML =
+   '<div class="narrow">'+
+   '<h1 class="sr-only">Afirmaciones '+(j+1)+' de 2</h1>'+
+   '<p class="qcount">Paso '+(N+2+j)+' de '+(N+3)+' · Cuánto te identificas · '+(j+1)+'/2</p>'+
+   '<p class="lead" style="margin-bottom:20px">¿Cuánto estás de acuerdo con cada frase?</p>'+
+   idx.map(function(ix){
+     return '<fieldset><legend>'+esc(LK[ix].t)+'</legend><div class="scale">'+[1,2,3,4,5].map(function(n){ return '<label class="opt"><input type="radio" name="lk'+ix+'" value="'+n+'"'+(S.lk[ix]===n?' checked':'')+' aria-label="'+n+' de 5"><span class="dot" aria-hidden="true"></span><span class="txt">'+n+'</span></label>'; }).join('')+'</div><div class="scale-ends"><span>1 · Nada de acuerdo</span><span>5 · Muy de acuerdo</span></div></fieldset>';
+   }).join('')+
+   '<p class="err" id="err" role="alert"></p>'+
+   '<div class="row"><button class="btn btn-primary" id="next" type="button">'+(j===1?'Terminar':'Siguiente')+'</button><button class="back" id="back" type="button">Atrás</button></div>'+
+   '</div>';
+  idx.forEach(function(ix){
+    Array.prototype.forEach.call(app.querySelectorAll('input[name="lk'+ix+'"]'), function(inp){
+      inp.onchange = function(){ S.lk[ix] = parseInt(inp.value,10); document.getElementById('err').textContent = ''; };
+    });
+  });
+  document.getElementById('back').onclick = function(){ if(j===0) viewB(N-1); else viewL(0); };
+  document.getElementById('next').onclick = function(){
+    if(idx.some(function(ix){ return !S.lk[ix]; })){ document.getElementById('err').textContent = 'Responde a las cuatro frases para continuar.'; return; }
+    if(j===0) viewL(1); else viewDone();
   };
   focusTop();
 }
@@ -641,7 +729,7 @@ function viewDone(){
     var msg = 'Ficha de acogida de ' + S.nombre + (S.re ? ' para ' + S.re : '') + ': ' + link;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   };
-  document.getElementById('back').onclick = function(){ viewB(QB.length-1); };
+  document.getElementById('back').onclick = function(){ viewL(1); };
   document.getElementById('again').onclick = function(){ S = newState(); viewIntro(); };
   focusTop();
 }
