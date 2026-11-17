@@ -519,6 +519,9 @@ function buildFicha(s){
     ['Le preocupa', WORRY[s.worry].short],
     ['Preferencia orientativa', prefLabel(pf)]
   ];
+  var cntM = {A:0,R:0,T:0,P:0}, cntL = {A:0,R:0,T:0,P:0};
+  s.m.forEach(function(k){ if(k) cntM[k]++; }); s.l.forEach(function(k){ if(k) cntL[k]++; });
+  facts.push(['Respuestas del test (más / menos de 14)', ['A','R','T','P'].sort(function(a,b){ return counts[b]-counts[a]; }).map(function(k){ return ST[k].name + ' ' + cntM[k] + ' / ' + cntL[k]; }).join(' · ')]);
   if (conf.nivel) facts.push(['Fiabilidad de este resultado', conf.nivel==='alta' ? 'Alta: las respuestas son coherentes entre sí' : conf.nivel==='media' ? 'Media: tómalo como punto de partida' : 'Baja: respuestas contradictorias o poco consistentes']);
   return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
           estilos:vig.map(function(k){ return ST[k]; }), vig:vig, pf:pf, counts:counts, adj:s.adj||null};
