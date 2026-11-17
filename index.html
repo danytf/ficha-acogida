@@ -552,7 +552,7 @@ function buildFicha(s){
   ];
   var cntM = {A:0,R:0,T:0,P:0}, cntL = {A:0,R:0,T:0,P:0};
   s.m.forEach(function(k){ if(k) cntM[k]++; }); s.l.forEach(function(k){ if(k) cntL[k]++; });
-  facts.push(['Respuestas del test (más / menos de 14)', ['A','R','T','P'].sort(function(a,b){ return counts[b]-counts[a]; }).map(function(k){ return ST[k].name + ' ' + cntM[k] + ' / ' + cntL[k]; }).join(' · ')]);
+  facts.push(['Cuántas veces lo eligió como «más» y como «menos» parecido a él (de 14 situaciones)', ['A','R','T','P'].sort(function(a,b){ return counts[b]-counts[a]; }).map(function(k){ return ST[k].name + ': ' + cntM[k] + ' más, ' + cntL[k] + ' menos'; }).join(' · ')]);
   if (conf.nivel) {
     var motivos = [];
     if (pf.tipo==='dudoso') motivos.push('las dos partes del test no coinciden');
