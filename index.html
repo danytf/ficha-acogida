@@ -519,7 +519,8 @@ function buildFicha(s){
   var conf = confianza(s, pf);
   var nivel = guiaNivel(s.exp, s.comp);
   /* Lo que ve el RE a media mañana manda: si no coincide con la ficha, se usan los consejos del estilo que ve */
-  var obs = s.adj && s.adj.o && pf.items.indexOf(s.adj.o) < 0 ? s.adj.o : null;
+  var visto = s.veri && s.veri.r ? s.veri.r : (s.adj && s.adj.o ? s.adj.o : null);
+  var obs = visto && pf.items.indexOf(visto) < 0 ? visto : null;
   var vig = obs ? [obs] : pf.items;
   var empieza = vig.length === 0
     ? 'Que te vea hacerlo 20–30 minutos y que practique enseguida una sola técnica. Observa qué te pide y decide por lo que veas.'
@@ -563,7 +564,7 @@ function buildFicha(s){
   }
   if (typeof s.seg === 'number') facts.push(['Tiempo de respuesta', fmtSeg(s.seg)]);
   return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
-          estilos:vig.map(function(k){ return ST[k]; }), vig:vig, pf:pf, counts:counts, adj:s.adj||null};
+          estilos:vig.map(function(k){ return ST[k]; }), vig:vig, pf:pf, counts:counts, adj:s.adj||null, veri:s.veri||null, obs:obs};
 }
 
 function planDia(f){
@@ -583,8 +584,23 @@ function ajusteInfo(f){
   else if (!items.length) estilo = 'La ficha no marcaba un estilo y tú ves el estilo ' + ST[o].name + ': úsalo como punto de partida.';
   else if (items.indexOf(o) >= 0) estilo = 'Lo que ves (' + ST[o].name + ') coincide con la ficha. Sigue como hasta ahora.';
   else estilo = 'Lo que ves (' + ST[o].name + ') no coincide con la ficha (' + names + '). Manda lo que ves: usa los consejos del estilo ' + ST[o].name + '.';
+  if (f.veri && f.veri.r) estilo = 'Observación de media mañana: ' + (o ? 'ves el estilo ' + ST[o].name : 'todavía no sabías qué estilo ver') + '. La confirmación a los 2-3 días (más abajo) manda sobre ella.';
   var hechas = SIG.filter(function(x,i){ return f.adj.s.charAt(i) === '1'; });
-  return {estilo:estilo, usaObs: !!o && items.indexOf(o) < 0, o:o, senales:hechas};
+  return {estilo:estilo, usaObs: !!o && f.obs === o, o:o, senales:hechas};
+}
+function veriInfo(f){
+  if (!f.veri) return null;
+  var r = f.veri.r, items = f.pf.items, names = items.map(function(k){ return ST[k].name; }).join(' y '), cuando = fmtDate(f.veri.d);
+  if (!r) return 'Confirmación del ' + cuando + ': todavía no sabes qué estilo ves. Sigue con la ficha y vuelve a comprobarlo.';
+  if (!items.length) return 'Confirmación del ' + cuando + ': la ficha no marcaba un estilo y ves el estilo ' + ST[r].name + '. Úsalo como punto de partida.';
+  if (items.indexOf(r) >= 0) return 'Confirmación del ' + cuando + ': ves el estilo ' + ST[r].name + ' y coincide con la ficha. Sigue como hasta ahora.';
+  return 'Confirmación del ' + cuando + ': ves el estilo ' + ST[r].name + ' y no coincide con la ficha (' + names + '). Manda lo que ves: usa los consejos del estilo ' + ST[r].name + '.';
+}
+function veriHtml(f){
+  var t = veriInfo(f);
+  if (!t) return '';
+  return '<section class="sec ajuste"><h2>Confirmación a los 2-3 días</h2><p class="hyp">'+esc(t)+'</p>'+
+    '<p class="muted small">Para que el equipo de Formación vea tu confirmación, pulsa «Copiar enlace» y envíaselo.</p></section>';
 }
 function toText(f){
   var L = [];
@@ -598,6 +614,8 @@ function toText(f){
     if (aj.senales.length){ L.push('Señales vistas y qué hacer:'); aj.senales.forEach(function(x){ L.push('- ' + x.t + ' → ' + x.h); }); }
     else L.push('No has marcado ninguna señal de alarma: sigue con el plan.');
   }
+  var vt = veriInfo(f);
+  if (vt){ L.push(''); L.push('CONFIRMACIÓN A LOS 2-3 DÍAS'); L.push(vt); }
   L.push('');
   L.push('EMPIEZA POR ESTO');
   L.push(f.empieza);
@@ -653,6 +671,7 @@ function encodeState(s){
   var o = {n:s.nombre, r:s.re, e:s.exp, c:s.comp, f:s.conf, w:s.worry, m:s.m.join(''), l:s.l.join(''), k:s.lk.join(''), d:s.iso || isoToday()};
   if (typeof s.seg === 'number') o.t = s.seg;
   if (s.adj) o.a = {o:s.adj.o, s:s.adj.s};
+  if (s.veri) o.v = {r:s.veri.r, d:s.veri.d};
   return 'v5.' + b64enc(JSON.stringify(o));
 }
 function decodeState(hash){
@@ -670,8 +689,10 @@ function decodeState(hash){
     var d = /^\d{4}-\d{2}-\d{2}$/.test(String(o.d)) ? String(o.d) : isoToday();
     var adj = null;
     if (o.a && typeof o.a === 'object' && (o.a.o===''||o.a.o==='A'||o.a.o==='R'||o.a.o==='T'||o.a.o==='P') && /^[01]{7}$/.test(String(o.a.s))) adj = {o:o.a.o, s:String(o.a.s)};
+    var veri = null;
+    if (o.v && typeof o.v === 'object' && (o.v.r===''||o.v.r==='A'||o.v.r==='R'||o.v.r==='T'||o.v.r==='P') && /^\d{4}-\d{2}-\d{2}$/.test(String(o.v.d))) veri = {r:o.v.r, d:String(o.v.d)};
     var seg = (typeof o.t === 'number' && isFinite(o.t) && o.t >= 0 && o.t <= 86400) ? Math.round(o.t) : null;
-    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d), iso:d, adj:adj, seg:seg};
+    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d), iso:d, adj:adj, veri:veri, seg:seg};
   }catch(e){ return null; }
 }
 function baseUrl(){ return location.href.split('#')[0]; }
@@ -919,6 +940,7 @@ function viewFicha(st){
    (f.re ? '<p class="muted" style="margin-top:10px">Para: '+esc(f.re)+'</p>' : '')+
    '<div class="facts">'+f.facts.map(function(x){ return '<div class="fact"><span class="k">'+esc(x[0])+'</span><span class="v">'+esc(x[1])+'</span></div>'; }).join('')+'</div>'+
    ajusteHtml(f)+
+   veriHtml(f)+
    '<div class="action"><span class="k">Empieza por esto</span><p>'+esc(f.empieza)+'</p></div>'+
    '<section class="sec"><h2>Cómo enseñarle</h2>'+(f.nota ? '<p class="hyp">'+esc(f.nota)+'</p>' : '')+'<div class="cards">'+cards+'</div></section>'+
    '<section class="sec"><h2>Plan del primer día</h2><p class="muted small">La persona nueva copia tu energía, no tus palabras.</p>'+sigHtml(planDia(f))+'</section>'+
@@ -929,10 +951,13 @@ function viewFicha(st){
    '<details class="fold"><summary>Base común para todos</summary><div class="inner">'+listHtml(COMUN)+'</div></details>'+
    '<p class="note">'+esc(AVISO)+'</p>'+
    '<div class="closing">Manda lo que ves hoy, no la ficha.</div>'+
-   '<div class="row" style="margin-top:24px"><button class="btn btn-primary" id="adj" type="button">'+(f.adj ? 'Cambiar el ajuste' : 'Ajustar con lo que ves')+'</button><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-ghost" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
+   '<div class="row" style="margin-top:24px"><button class="btn btn-primary" id="adj" type="button">'+(f.adj ? 'Cambiar el ajuste' : 'Ajustar con lo que ves')+'</button><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-ghost" id="ver" type="button">'+(f.veri ? 'Cambiar la confirmación' : 'Confirmar el estilo (2-3 días)')+'</button>'+(canLink() ? '<button class="btn btn-ghost" id="lnk" type="button">Copiar enlace</button>' : '')+'<button class="btn btn-ghost" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
    '<p class="status" id="status" role="status"></p>'+VALS;
   var txt = toText(f);
   document.getElementById('adj').onclick = function(){ viewAjuste(st); };
+  document.getElementById('ver').onclick = function(){ viewVeri(st); };
+  var lnkBtn = document.getElementById('lnk');
+  if (lnkBtn) lnkBtn.onclick = function(){ copyText(baseUrl() + '#' + encodeState(st), document.getElementById('status'), 'Enlace copiado. Pégalo en el mensaje donde quieras enviarlo.'); };
   document.getElementById('copy').onclick = function(){ copyText(txt, document.getElementById('status'), 'Ficha copiada. Ya puedes pegarla donde quieras.'); };
   document.getElementById('pdf').onclick = function(){ printFicha(f); };
   document.getElementById('again').onclick = function(){ S = newState(); location.hash = ''; route(); };
@@ -972,13 +997,40 @@ function viewAjuste(st){
   focusTop();
 }
 
+/* Confirmación a los 2-3 días: lo que ve el RE manda sobre la ficha y sirve para saber si el test acierta. Viaja en el enlace, no se guarda en ningún sitio. */
+function viewVeri(st){
+  tagEl.textContent = 'Confirmación';
+  var f = buildFicha(st), cur = st.veri || null;
+  app.innerHTML =
+   '<div class="narrow">'+
+   '<p class="eyebrow">A los 2-3 días</p>'+
+   '<h1>Confirma el estilo con lo que has visto</h1>'+
+   '<p class="lead" style="margin-top:16px">Después de unos días con '+esc(f.nombre)+', ¿qué estilo ves de verdad? Lo que ves manda sobre la ficha y ayuda a saber si el test acierta.</p>'+
+   '<fieldset style="margin-top:24px"><legend>¿Qué ves en cómo aprende?</legend><div class="opts">'+
+     OBS.map(function(x){ return opt('obs', x.k||'none', x.t, !!cur && cur.r === x.k); }).join('')+
+   '</div></fieldset>'+
+   '<p class="err" id="err" role="alert"></p>'+
+   '<div class="row"><button class="btn btn-primary" id="apply" type="button">Guardar confirmación</button><button class="back" id="cancel" type="button">Volver sin cambios</button></div>'+
+   '</div>';
+  document.getElementById('cancel').onclick = function(){ viewFicha(st); };
+  document.getElementById('apply').onclick = function(){
+    var sel = app.querySelector('input[name="obs"]:checked');
+    if (!sel){ document.getElementById('err').textContent = 'Elige qué ves en cómo aprende (o «Todavía no lo sé»).'; return; }
+    var nuevo = {}; for (var k in st) nuevo[k] = st[k];
+    nuevo.veri = {r: sel.value === 'none' ? '' : sel.value, d: isoToday()};
+    var h = '#' + encodeState(nuevo);
+    if (location.hash === h) route(); else location.hash = h;
+  };
+  focusTop();
+}
+
 function route(){
   var st = decodeState(location.hash);
   if (st) viewFicha(st); else viewIntro();
 }
 window.addEventListener('hashchange', route);
 
-window.__ficha = {perfilFinal:perfilFinal, confianza:confianza, planDia:planDia, ajusteInfo:ajusteInfo, SIG:SIG, OBS:OBS, profile:profile, buildFicha:buildFicha, toText:toText, guiaNivel:guiaNivel, encodeState:encodeState, decodeState:decodeState, prefLabel:prefLabel, ST:ST};
+window.__ficha = {veriInfo:veriInfo, perfilFinal:perfilFinal, confianza:confianza, planDia:planDia, ajusteInfo:ajusteInfo, SIG:SIG, OBS:OBS, profile:profile, buildFicha:buildFicha, toText:toText, guiaNivel:guiaNivel, encodeState:encodeState, decodeState:decodeState, prefLabel:prefLabel, ST:ST};
 route();
 </script>
 </body>
