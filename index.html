@@ -407,7 +407,8 @@ var QB = [
 ];
 
 /* Afirmaciones de acuerdo (1 a 5): tres por estilo, en este orden fijo; la tercera de cada estilo está redactada al revés (se puntúa 6 − respuesta). Sirven para confirmar o poner en duda el resultado de las situaciones. */
-var LK = [
+/* Frases de las fichas antiguas (enlaces v4 y v5): incluyen cuatro invertidas. No se tocan para que esas fichas se lean igual que cuando se hicieron. */
+var LK5 = [
   {k:'A', t:'Prefiero probar algo yo mismo antes de que me lo expliquen todo.'},
   {k:'A', t:'Aprendo más haciendo y equivocándome que escuchando explicaciones.'},
   {k:'R', t:'Antes de actuar, me gusta ver cómo lo hacen otras personas.'},
@@ -421,6 +422,23 @@ var LK = [
   {k:'T', t:'Me da igual no entender por qué funciona algo si me funciona.', rev:true},
   {k:'P', t:'Me gusta que me expliquen cosas aunque no las vaya a usar pronto.', rev:true}
 ];
+/* Frases actuales (enlaces v6): doce afirmaciones directas, tres por estilo, sin invertidas */
+var LK6 = [
+  {k:'A', t:'Prefiero probar algo yo mismo antes de que me lo expliquen todo.'},
+  {k:'R', t:'Antes de actuar, me gusta ver cómo lo hacen otras personas.'},
+  {k:'T', t:'Prefiero entender bien la lógica de algo aunque tarde más en ponerme a hacerlo.'},
+  {k:'P', t:'Me quedo con lo que veo que puedo aplicar enseguida.'},
+  {k:'A', t:'Aprendo más haciendo y equivocándome que escuchando explicaciones.'},
+  {k:'R', t:'Necesito tiempo para pensar las cosas antes de dar una respuesta.'},
+  {k:'T', t:'Si no entiendo por qué se hace de una manera, me cuesta hacerlo aunque me lo pidan.'},
+  {k:'P', t:'Prefiero una solución concreta a una explicación general.'},
+  {k:'A', t:'Prefiero lanzarme y corregir sobre la marcha antes que prepararme mucho.'},
+  {k:'R', t:'Prefiero repasar con calma lo que acaba de pasar antes de pasar a lo siguiente.'},
+  {k:'T', t:'Prefiero tener claro el esquema de cómo funciona algo antes de aplicarlo.'},
+  {k:'P', t:'Prefiero aprender lo que voy a usar hoy que lo que quizá me sirva algún día.'}
+];
+var LK = LK6;
+function lkSet(s){ return s && s.ver === 5 ? LK5 : LK6; }
 
 /* ===== Lógica ===== */
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
@@ -435,7 +453,7 @@ function scoresOf(s){
 }
 function lkMeans(s){
   var t = {A:0,R:0,T:0,P:0}, n = {A:0,R:0,T:0,P:0};
-  LK.forEach(function(it,i){ if (s.lk && s.lk[i]) { t[it.k] += it.rev ? 6 - s.lk[i] : s.lk[i]; n[it.k]++; } });
+  lkSet(s).forEach(function(it,i){ if (s.lk && s.lk[i]) { t[it.k] += it.rev ? 6 - s.lk[i] : s.lk[i]; n[it.k]++; } });
   var m = {}; ['A','R','T','P'].forEach(function(k){ m[k] = n[k] ? t[k]/n[k] : 0; });
   return m;
 }
@@ -491,8 +509,9 @@ function confianza(s, pf){
   var igual = s.lk.every(function(v){ return v === s.lk[0]; });
   var lkIncoh = ['A','R','T','P'].filter(function(k){
     var d = [], r = null;
-    LK.forEach(function(it,i){ if (it.k===k) { if (it.rev) r = 6 - s.lk[i]; else d.push(s.lk[i]); } });
-    return Math.abs(d.reduce(function(a,b){ return a+b; },0)/d.length - r) >= 3;
+    lkSet(s).forEach(function(it,i){ if (it.k===k) { if (it.rev) r = 6 - s.lk[i]; else d.push(s.lk[i]); } });
+    /* Sin frase invertida (fichas v6) no hay nada que comparar */
+    return r !== null && d.length > 0 && Math.abs(d.reduce(function(a,b){ return a+b; },0)/d.length - r) >= 3;
   }).length >= 2;
   var nivel = pf.tipo==='claro' ? 'alta' : (pf.tipo==='par' || pf.tipo==='probable') ? 'media' : pf.tipo==='dudoso' ? 'baja' : null;
   if (igual && nivel === 'alta') nivel = 'media';
@@ -523,7 +542,7 @@ function respInfo(s){
     var m = s.m && s.m[i], l = s.l && s.l[i];
     return {q:q.t, mk:m||'', mt:m ? q.o[m] : '', lk:l||'', lt:l ? q.o[l] : ''};
   });
-  var lik = LK.map(function(it,i){
+  var lik = lkSet(s).map(function(it,i){
     var v = s.lk && s.lk[i];
     return {t:it.t, k:it.k, rev:!!it.rev, v:v||0};
   });
@@ -714,12 +733,13 @@ function encodeState(s){
   if (typeof s.seg === 'number') o.t = s.seg;
   if (s.adj) o.a = {o:s.adj.o, s:s.adj.s};
   if (s.veri) o.v = {r:s.veri.r, d:s.veri.d};
-  return 'v5.' + b64enc(JSON.stringify(o));
+  return (s.ver === 5 ? 'v5.' : 'v6.') + b64enc(JSON.stringify(o));
 }
 function decodeState(hash){
   try{
     var h = String(hash||'').replace(/^#/,'');
-    if (h.indexOf('v5.') !== 0 && h.indexOf('v4.') !== 0) return null;
+    if (h.indexOf('v6.') !== 0 && h.indexOf('v5.') !== 0 && h.indexOf('v4.') !== 0) return null;
+    var ver = h.indexOf('v6.') === 0 ? 6 : 5;
     var o = JSON.parse(b64dec(h.slice(3)));
     if (!o || typeof o !== 'object') return null;
     var nombre = String(o.n||'').trim().slice(0,60), re = String(o.r||'').trim().slice(0,60);
@@ -734,7 +754,7 @@ function decodeState(hash){
     var veri = null;
     if (o.v && typeof o.v === 'object' && (o.v.r===''||o.v.r==='A'||o.v.r==='R'||o.v.r==='T'||o.v.r==='P') && /^\d{4}-\d{2}-\d{2}$/.test(String(o.v.d))) veri = {r:o.v.r, d:String(o.v.d)};
     var seg = (typeof o.t === 'number' && isFinite(o.t) && o.t >= 0 && o.t <= 86400) ? Math.round(o.t) : null;
-    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), fecha:fmtDate(d), iso:d, adj:adj, veri:veri, seg:seg};
+    return {nombre:nombre, re:re, exp:o.e, comp:o.c, conf:o.f, worry:o.w, m:m.split(''), l:l.split(''), lk:k.split('').map(Number), ver:ver, fecha:fmtDate(d), iso:d, adj:adj, veri:veri, seg:seg};
   }catch(e){ return null; }
 }
 function baseUrl(){ return location.href.split('#')[0]; }
@@ -746,7 +766,7 @@ var bar = document.getElementById('bar');
 var barwrap = document.getElementById('barwrap');
 var tagEl = document.getElementById('tag');
 var TOTAL = 20;
-function newState(){ return {nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], lk:[null,null,null,null,null,null,null,null,null,null,null,null], order:[], lkOrder:[], t0:null, seg:null}; }
+function newState(){ return {ver:6, nombre:'', re:'', fecha:'', exp:null, comp:null, conf:null, worry:null, m:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], l:[null,null,null,null,null,null,null,null,null,null,null,null,null,null], lk:[null,null,null,null,null,null,null,null,null,null,null,null], order:[], lkOrder:[], t0:null, seg:null}; }
 var S = newState();
 
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
