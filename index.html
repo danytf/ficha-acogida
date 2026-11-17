@@ -473,7 +473,9 @@ function perfilFinal(s){
     if (c[items[0]] - c[items[1]] < 0.02 && items[1] === s.m[0]) items.reverse();
   }
   else { tipo = 'probable'; items = [rc[0]]; }
-  return {tipo:tipo, max:sc[rs[0]], items:items, scores:sc, comb:c, sitTop:rs[0], likTop:rl[0]};
+  /* Estilo secundario: el segundo de la puntuación combinada, solo si tiene peso propio. Es la salida de seguridad si el principal no encaja. */
+  var sec = ((tipo === 'claro' || tipo === 'probable') && c[rc[1]] > 0.05) ? rc[1] : null;
+  return {tipo:tipo, max:sc[rs[0]], items:items, scores:sc, comb:c, sitTop:rs[0], likTop:rl[0], sec:sec};
 }
 /* Fiabilidad de este resultado: ¿se contradicen las respuestas? ¿coinciden las dos partes del test? ¿contestó con calma? */
 function confianza(s, pf){
@@ -505,8 +507,9 @@ function prefLabel(pf){
   if (pf.tipo==='sin') return 'Sin preferencia clara';
   var n = ST[pf.items[0]].name, sc = pf.scores;
   if (pf.tipo==='dudoso') return 'Dudoso: ' + ST[pf.items[0]].name + ' en las situaciones o ' + ST[pf.items[1]].name + ' en las afirmaciones';
-  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 14)';
-  if (pf.tipo==='probable') return n + ' (probable, ' + sg(sc[pf.items[0]]) + ' de 14)';
+  var segundo = pf.sec ? ' · Secundario: ' + ST[pf.sec].name : '';
+  if (pf.tipo==='claro') return n + ' (claro, ' + sg(sc[pf.items[0]]) + ' de 14)' + segundo;
+  if (pf.tipo==='probable') return n + ' (probable, ' + sg(sc[pf.items[0]]) + ' de 14)' + segundo;
   return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 14)';
 }
 
@@ -536,6 +539,7 @@ function buildFicha(s){
   else if (pf.tipo==='dudoso') nota = 'Resultado dudoso: lo que eligió en las situaciones (' + ST[pf.items[0]].name + ') no coincide con lo que dice de sí mismo en las afirmaciones (' + ST[pf.items[1]].name + '). Usa los consejos de las dos tarjetas, la base común y manda lo que veas.';
   else if (pf.tipo==='par') nota = 'Dos estilos a la par: va primero el que marcó al elegir qué le gustaría que pasara primero. Combina los consejos de ambas tarjetas y comprueba cuáles le funcionan.';
   else if (pf.tipo==='sin') nota = 'Sus respuestas no se inclinan hacia un estilo: usa la base común, observa cómo reacciona y ajusta según lo que veas.';
+  if (pf.sec) nota = (nota ? nota + ' ' : '') + 'Estilo secundario: ' + ST[pf.sec].name + '. Si el principal no encaja, prueba: ' + ST[pf.sec].primeras;
   if (conf.contradice || conf.lkIncoh) nota = (nota ? nota + ' ' : '') + 'Resultado poco fiable: ' + (conf.contradice ? 'hay respuestas que se contradicen' : 'las afirmaciones de 1 a 5 se contradicen entre sí') + '. Usa la base común y fíate más de lo que veas.';
   if (conf.rapido) nota = (nota ? nota + ' ' : '') + 'Contestó muy rápido (' + fmtSeg(s.seg) + '): tómalo con más cautela.';
   if (conf.igual) nota = (nota ? nota + ' ' : '') + 'Contestó igual a todas las afirmaciones de 1 a 5, así que no sirven para confirmar el resultado.';
