@@ -559,23 +559,9 @@ function toText(f){
   L.push('');
   L.push('EMPIEZA POR ESTO');
   L.push(f.empieza);
-  L.push('');
-  L.push('PLAN DEL PRIMER DÍA');
-  planDia(f).forEach(function(x){ L.push('- ' + x[0] + ': ' + x[1]); });
-  L.push('');
-  L.push('DÍAS 1 A 5, CADA DÍA');
-  DIAS.forEach(function(a){ L.push('- ' + a); });
-  L.push(DIAS_NOTA);
-  L.push('');
-  L.push('TRES COSAS PARA HOY');
-  f.ajustes.forEach(function(a){ L.push('- ' + a); });
-  if (f.senales.length){ L.push(''); L.push(f.senales.length>1 ? 'SEÑALES A VIGILAR' : 'UNA SEÑAL A VIGILAR'); f.senales.forEach(function(x){ L.push(x[0] + ' → ' + x[1]); }); }
-  L.push('');
-  L.push('BASE COMÚN');
-  COMUN.forEach(function(a){ L.push('- ' + a); });
-  L.push('');
-  if (f.nota){ L.push(f.nota); L.push(''); }
+  if (f.nota){ L.push(''); L.push(f.nota); }
   f.estilos.forEach(function(e){
+    L.push('');
     L.push('CÓMO ENSEÑARLE · ' + e.name.toUpperCase());
     L.push(e.aprende);
     L.push('Cómo explicarle:');
@@ -584,10 +570,24 @@ function toText(f){
     L.push('Señales y qué hacer:');
     e.senales.forEach(function(a){ L.push('- ' + a[0] + ' → ' + a[1]); });
     if (e.nota) L.push(e.nota);
-    L.push('');
   });
+  L.push('');
+  L.push('PLAN DEL PRIMER DÍA');
+  planDia(f).forEach(function(x){ L.push('- ' + x[0] + ': ' + x[1]); });
+  L.push('');
+  L.push('TRES COSAS PARA HOY');
+  f.ajustes.forEach(function(a){ L.push('- ' + a); });
+  if (f.senales.length){ L.push(''); L.push(f.senales.length>1 ? 'SEÑALES A VIGILAR' : 'UNA SEÑAL A VIGILAR'); f.senales.forEach(function(x){ L.push(x[0] + ' → ' + x[1]); }); }
+  L.push('');
+  L.push('DÍAS 1 A 5, CADA DÍA');
+  DIAS.forEach(function(a){ L.push('- ' + a); });
+  L.push(DIAS_NOTA);
+  L.push('');
   L.push('COMPRUEBA HOY');
   COMPRUEBA.forEach(function(a){ L.push('- ' + a); });
+  L.push('');
+  L.push('BASE COMÚN');
+  COMUN.forEach(function(a){ L.push('- ' + a); });
   L.push('');
   L.push(AVISO);
   return L.join('\n');
@@ -873,13 +873,13 @@ function viewFicha(st){
    '<div class="facts">'+f.facts.map(function(x){ return '<div class="fact"><span class="k">'+esc(x[0])+'</span><span class="v">'+esc(x[1])+'</span></div>'; }).join('')+'</div>'+
    ajusteHtml(f)+
    '<div class="action"><span class="k">Empieza por esto</span><p>'+esc(f.empieza)+'</p></div>'+
+   '<section class="sec"><h2>Cómo enseñarle</h2>'+(f.nota ? '<p class="hyp">'+esc(f.nota)+'</p>' : '')+'<div class="cards">'+cards+'</div></section>'+
    '<section class="sec"><h2>Plan del primer día</h2><p class="muted small">La persona nueva copia tu energía, no tus palabras.</p>'+sigHtml(planDia(f))+'</section>'+
-   '<section class="sec"><h2>Días 1 a 5, cada día</h2>'+listHtml(DIAS)+'<p class="muted small" style="margin-top:8px">'+esc(DIAS_NOTA)+'</p></section>'+
    '<section class="sec"><h2>Tres cosas para hoy</h2>'+listHtml(f.ajustes)+'</section>'+
    (f.senales.length ? '<section class="sec"><h2>'+(f.senales.length>1 ? 'Señales a vigilar' : 'Una señal a vigilar')+'</h2>'+sigHtml(f.senales)+'</section>' : '')+
-   '<details class="fold"><summary>Cómo enseñarle</summary><div class="inner">'+(f.nota ? '<p class="hyp">'+esc(f.nota)+'</p>' : '')+'<div class="cards">'+cards+'</div></div></details>'+
-   '<details class="fold"><summary>Base común para todos</summary><div class="inner">'+listHtml(COMUN)+'</div></details>'+
+   '<section class="sec"><h2>Días 1 a 5, cada día</h2>'+listHtml(DIAS)+'<p class="muted small" style="margin-top:8px">'+esc(DIAS_NOTA)+'</p></section>'+
    '<details class="fold"><summary>Comprueba hoy</summary><div class="inner">'+listHtml(COMPRUEBA)+'</div></details>'+
+   '<details class="fold"><summary>Base común para todos</summary><div class="inner">'+listHtml(COMUN)+'</div></details>'+
    '<p class="note">'+esc(AVISO)+'</p>'+
    '<div class="closing">Manda lo que ves hoy, no la ficha.</div>'+
    '<div class="row" style="margin-top:24px"><button class="btn btn-primary" id="adj" type="button">'+(f.adj ? 'Cambiar el ajuste' : 'Ajustar con lo que ves')+'</button><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-ghost" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
