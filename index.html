@@ -451,6 +451,7 @@ function profile(sc){
    par: dos estilos casi empatados en la puntuación combinada; dudoso: el estilo que más eligió en las situaciones y el que más marca en las afirmaciones no coinciden;
    sin: ningún estilo destaca; probable: el resto (siempre hay un estilo sobre el que empezar, que se confirma con lo que ve el RE). */
 var PESO_S = 0.6, PESO_L = 0.4, MUY_RAPIDO = 180;
+var MARGEN_DUDA = 0.15;
 function orden(o){ return ['A','R','T','P'].sort(function(a,b){ return o[b]-o[a]; }); }
 function combinado(s){
   var sc = scoresOf(s), lm = lkMeans(s), mean = (lm.A+lm.R+lm.T+lm.P)/4, c = {};
@@ -461,8 +462,11 @@ function perfilFinal(s){
   var cb = combinado(s), sc = cb.sc, lm = cb.lm, c = cb.c;
   var rs = orden(sc), rl = orden(lm), rc = orden(c);
   var informativo = (lm[rl[0]] - cb.mean) >= 0.5 && sc[rs[0]] >= 3;
-  var conflicto = informativo && (rl.slice(0,2).indexOf(rs[0]) < 0 || rs.slice(0,2).indexOf(rl[0]) < 0);
-  var fuerte = sc[rs[0]] >= 7 && sc[rs[0]] - sc[rs[1]] >= 5;
+  var bruto = informativo && (rl.slice(0,2).indexOf(rs[0]) < 0 || rs.slice(0,2).indexOf(rl[0]) < 0);
+  /* Solo es dudoso si la puntuación combinada tampoco decide: si el primero saca al segundo al menos MARGEN_DUDA, manda el combinado (y nunca como «claro») */
+  var decide = c[rc[0]] - c[rc[1]] >= MARGEN_DUDA;
+  var conflicto = bruto && !decide;
+  var fuerte = sc[rs[0]] >= 7 && sc[rs[0]] - sc[rs[1]] >= 5 && !bruto;
   var tipo, items;
   if (conflicto) { tipo = 'dudoso'; items = [rs[0], rl[0]]; }
   else if (c[rc[0]] < 0.15) { tipo = 'sin'; items = []; }
@@ -481,7 +485,8 @@ function perfilFinal(s){
 function confianza(s, pf){
   var most = {A:0,R:0,T:0,P:0}, least = {A:0,R:0,T:0,P:0};
   s.m.forEach(function(k){ if(k) most[k]++; }); s.l.forEach(function(k){ if(k) least[k]++; });
-  var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 5 && least[k] >= 4; });
+  /* Una contradicción solo resta fiabilidad si afecta al estilo que se recomienda; en los demás suele ser preferencia según el contexto */
+  var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 5 && least[k] >= 4 && pf.items.indexOf(k) >= 0; });
   var lm = lkMeans(s);
   var igual = s.lk.every(function(v){ return v === s.lk[0]; });
   var lkIncoh = ['A','R','T','P'].filter(function(k){
