@@ -451,7 +451,7 @@ function profile(sc){
 function confianza(s, pf){
   var most = {A:0,R:0,T:0,P:0}, least = {A:0,R:0,T:0,P:0};
   s.m.forEach(function(k){ if(k) most[k]++; }); s.l.forEach(function(k){ if(k) least[k]++; });
-  var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 4 && least[k] >= 3; });
+  var contradice = ['A','R','T','P'].some(function(k){ return most[k] >= 5 && least[k] >= 4; });
   var lm = lkMeans(s);
   var igual = s.lk.every(function(v){ return v === s.lk[0]; });
   var lkIncoh = ['A','R','T','P'].filter(function(k){
