@@ -513,6 +513,42 @@ function prefLabel(pf){
   return n + ' y ' + ST[pf.items[1]].name + ' a la par (' + sg(sc[pf.items[0]]) + ' y ' + sg(sc[pf.items[1]]) + ' de 14)';
 }
 
+function respInfo(s){
+  var sit = QB.map(function(q,i){
+    var m = s.m && s.m[i], l = s.l && s.l[i];
+    return {q:q.t, mk:m||'', mt:m ? q.o[m] : '', lk:l||'', lt:l ? q.o[l] : ''};
+  });
+  var lik = LK.map(function(it,i){
+    var v = s.lk && s.lk[i];
+    return {t:it.t, k:it.k, rev:!!it.rev, v:v||0};
+  });
+  return {sit:sit, lik:lik};
+}
+function respHtml(f){
+  if (!f.resp) return '';
+  var sit = f.resp.sit.map(function(x,i){
+    return '<li><strong>'+esc(x.q)+'</strong><br>Más como yo (<b>'+esc(x.mk||'—')+'</b>): '+esc(x.mt||'sin respuesta')+'<br>Menos como yo (<b>'+esc(x.lk||'—')+'</b>): '+esc(x.lt||'sin respuesta')+'</li>';
+  }).join('');
+  var lik = f.resp.lik.map(function(x,i){
+    return '<li>'+esc(x.t)+' <b>'+(x.v||'—')+'/5</b> <span class="muted small">('+esc(x.k)+(x.rev?', frase invertida':'')+')</span></li>';
+  }).join('');
+  return '<details class="fold"><summary>Respuestas pregunta a pregunta</summary><div class="inner">'+
+    '<p class="muted small">Son una pista para conversar con la persona, no una evaluación. Entre paréntesis, el estilo de cada opción (A activo, R reflexivo, T teórico, P pragmático).</p>'+
+    '<h3>Situaciones</h3><ol class="tight">'+sit+'</ol>'+
+    '<h3>Afirmaciones (1 = nada de acuerdo, 5 = totalmente de acuerdo)</h3><ul class="tight">'+lik+'</ul></div></details>';
+}
+function respText(f){
+  if (!f.resp) return [];
+  var L = ['', 'RESPUESTAS PREGUNTA A PREGUNTA (pista para conversar, no una evaluación)', 'Situaciones:'];
+  f.resp.sit.forEach(function(x,i){
+    L.push((i+1) + '. ' + x.q);
+    L.push('   Más como yo (' + (x.mk||'—') + '): ' + (x.mt||'sin respuesta'));
+    L.push('   Menos como yo (' + (x.lk||'—') + '): ' + (x.lt||'sin respuesta'));
+  });
+  L.push('Afirmaciones (1 = nada de acuerdo, 5 = totalmente de acuerdo):');
+  f.resp.lik.forEach(function(x,i){ L.push('- ' + x.t + ' ' + (x.v||'—') + '/5 (' + x.k + (x.rev?', invertida':'') + ')'); });
+  return L;
+}
 function buildFicha(s){
   var counts = scoresOf(s);
   var pf = perfilFinal(s);
@@ -563,7 +599,7 @@ function buildFicha(s){
     facts.push(['Fiabilidad de este resultado', conf.nivel==='alta' ? 'Alta: las situaciones y las afirmaciones coinciden' : conf.nivel==='media' ? 'Media: tómalo como punto de partida y confírmalo' + (conf.rapido ? ' (contestó muy rápido)' : '') : 'Baja: ' + (motivos.join('; ') || 'respuestas poco consistentes')]);
   }
   if (typeof s.seg === 'number') facts.push(['Tiempo de respuesta', fmtSeg(s.seg)]);
-  return {nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
+  return {resp:respInfo(s), nombre:s.nombre, re:s.re, fecha:s.fecha, facts:facts, empieza:empieza, ajustes:ajustes, senal:senal, senales:senales, nota:nota,
           estilos:vig.map(function(k){ return ST[k]; }), vig:vig, pf:pf, counts:counts, adj:s.adj||null, veri:s.veri||null, obs:obs};
 }
 
@@ -648,6 +684,7 @@ function toText(f){
   L.push('');
   L.push('BASE COMÚN');
   COMUN.forEach(function(a){ L.push('- ' + a); });
+  respText(f).forEach(function(x){ L.push(x); });
   L.push('');
   L.push(AVISO);
   return L.join('\n');
@@ -949,6 +986,7 @@ function viewFicha(st){
    '<section class="sec"><h2>Días 1 a 5, cada día</h2>'+listHtml(DIAS)+'<p class="muted small" style="margin-top:8px">'+esc(DIAS_NOTA)+'</p></section>'+
    '<details class="fold"><summary>Comprueba hoy</summary><div class="inner">'+listHtml(COMPRUEBA)+'</div></details>'+
    '<details class="fold"><summary>Base común para todos</summary><div class="inner">'+listHtml(COMUN)+'</div></details>'+
+   respHtml(f)+
    '<p class="note">'+esc(AVISO)+'</p>'+
    '<div class="closing">Manda lo que ves hoy, no la ficha.</div>'+
    '<div class="row" style="margin-top:24px"><button class="btn btn-primary" id="adj" type="button">'+(f.adj ? 'Cambiar el ajuste' : 'Ajustar con lo que ves')+'</button><button class="btn btn-ink" id="copy" type="button">Copiar ficha</button><button class="btn btn-ghost" id="ver" type="button">'+(f.veri ? 'Cambiar la confirmación' : 'Confirmar el estilo (2-3 días)')+'</button>'+(canLink() ? '<button class="btn btn-ghost" id="lnk" type="button">Copiar enlace</button>' : '')+'<button class="btn btn-ghost" id="pdf" type="button">Guardar PDF</button><button class="btn btn-ghost" id="again" type="button">Nueva ficha</button></div>'+
